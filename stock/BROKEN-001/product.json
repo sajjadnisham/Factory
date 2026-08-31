@@ -1,0 +1,7 @@
+{
+  "sku": "BROKEN-001",
+  "type": "spaceship",
+  "name": "Not A Real Product",
+  "price": "free",
+  "sizes": ["M"]
+}

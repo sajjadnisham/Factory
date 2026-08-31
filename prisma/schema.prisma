@@ -1,0 +1,436 @@
+// Men's fashion e-commerce — data model.
+//
+// Two sources of data meet here:
+//   * Product *content* (name, price, images, sizes) originates in the STOCK
+//     folder and is written by the sync service. Never edit it by hand in the
+//     admin panel — the folder is the source of truth.
+//   * Transactional state (stock levels, carts, orders, payments) originates
+//     here and is never written by the sync service.
+// Fields owned by sync are grouped under "synced from STOCK" comments.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Catalog
+// ---------------------------------------------------------------------------
+
+model Category {
+  id       String    @id @default(cuid())
+  slug     String    @unique
+  name     String
+  sortOrder Int      @default(0)
+  products Product[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Product {
+  id String @id @default(cuid())
+
+  // --- synced from STOCK ---
+  // Folder id in the storage provider. Stable across renames on Drive, which is
+  // how a renamed folder is detected as a rename rather than delete + create.
+  externalFolderId String  @unique
+  externalFolderName String
+  sku              String  @unique
+  name             String
+  slug             String  @unique
+  type             String
+  description      String  @default("")
+  active           Boolean @default(true)
+  featured         Boolean @default(false)
+  newArrival       Boolean @default(false)
+  // Raw parsed metadata, kept for admin debugging of parse results.
+  sourceMetadata   Json?
+  // Hash of parsed metadata + image list; lets sync skip untouched products.
+  contentHash      String?
+
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  variants ProductVariant[]
+  images   ProductImage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([active, newArrival])
+  @@index([active, featured])
+  @@index([type])
+}
+
+model ProductVariant {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  // --- synced from STOCK ---
+  size  String
+  color String
+  // Price in laari (MVR * 100) to keep money in integers.
+  priceMinor         Int
+  comparePriceMinor  Int?
+
+  // --- transactional, owned by the database ---
+  stock             Int @default(0)
+  reservedStock     Int @default(0)
+  lowStockThreshold Int @default(3)
+  /// What STOCK declared at the last sync. Sync applies the *difference*
+  /// against this, so restocking in the folder never erases units already sold.
+  syncedStock       Int @default(0)
+
+  orderItems             OrderItem[]
+  cartItems              CartItem[]
+  inventoryTransactions  InventoryTransaction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([productId, size, color])
+  @@index([productId])
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  // --- synced from STOCK ---
+  sourceFileId String
+  fileName     String
+  // Populated when a CDN/public bucket is configured; otherwise images stream
+  // through /api/images/[id] from the storage provider.
+  url          String?
+  sortOrder    Int     @default(0)
+  contentHash  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([productId, sourceFileId])
+  @@index([productId, sortOrder])
+}
+
+/// Products whose folder failed validation. Surfaced in the admin sync report
+/// so one bad folder never blocks the rest of the catalog.
+model ProductSyncIssue {
+  id               String   @id @default(cuid())
+  externalFolderId String
+  folderName       String
+  sku              String?
+  severity         String   @default("error")
+  message          String
+  details          Json?
+  syncRunId        String?
+  syncRun          SyncRun? @relation(fields: [syncRunId], references: [id], onDelete: Cascade)
+  createdAt        DateTime @default(now())
+
+  @@index([syncRunId])
+}
+
+model SyncRun {
+  id        String   @id @default(cuid())
+  startedAt DateTime @default(now())
+  finishedAt DateTime?
+  status    String   @default("running") // running | success | failed
+
+  productsFound  Int @default(0)
+  productsNew    Int @default(0)
+  productsUpdated Int @default(0)
+  productsRemoved Int @default(0)
+  imagesUpdated  Int @default(0)
+  invalidProducts Int @default(0)
+
+  errorMessage String?
+  triggeredBy  String? // admin username or "cli"
+
+  issues ProductSyncIssue[]
+
+  @@index([startedAt])
+}
+
+// ---------------------------------------------------------------------------
+// Inventory
+// ---------------------------------------------------------------------------
+
+model InventoryTransaction {
+  id        String @id @default(cuid())
+  variantId String
+  variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+
+  // sync_set | reserve | release | fulfil | restock | manual_adjust
+  kind      String
+  quantity  Int
+  // Snapshot of the resulting on-hand stock, for auditability.
+  stockAfter Int
+  orderId   String?
+  order     Order?  @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  note      String?
+  createdAt DateTime @default(now())
+
+  @@index([variantId, createdAt])
+  @@index([orderId])
+}
+
+// ---------------------------------------------------------------------------
+// Customers, authentication and addresses
+// ---------------------------------------------------------------------------
+
+model Customer {
+  id String @id @default(cuid())
+
+  // E.164, the account identity. There are no passwords — phone + OTP only.
+  phone     String  @unique
+  name      String
+  email     String?
+  active    Boolean @default(true)
+
+  addresses Address[]
+  orders    Order[]
+  carts     Cart[]
+  sessions  Session[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Address {
+  id         String   @id @default(cuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  label        String  @default("Home")
+  recipientName String
+  phone        String
+  addressLine  String
+  area         String
+  island       String  @default("")
+  instructions String?
+  isDefault    Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([customerId])
+}
+
+/// A pending phone verification. The code itself is never stored — only a
+/// salted SHA-256 hash — and the row is deleted once consumed.
+model OtpChallenge {
+  id        String   @id @default(cuid())
+  phone     String
+  codeHash  String
+  purpose   String   @default("checkout") // checkout | login
+  attempts  Int      @default(0)
+  expiresAt DateTime
+  consumedAt DateTime?
+  // Set once verification succeeds; the checkout endpoint requires it.
+  verifiedToken String? @unique
+  createdAt DateTime @default(now())
+
+  @@index([phone, createdAt])
+  @@index([expiresAt])
+}
+
+/// Generic fixed-window rate limiter, also used for OTP send throttling.
+model RateLimit {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  count     Int      @default(0)
+  windowStart DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([windowStart])
+}
+
+model Session {
+  id         String   @id @default(cuid())
+  // SHA-256 of the cookie token; the raw token only ever lives in the cookie.
+  tokenHash  String   @unique
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  adminId    String?
+  admin      AdminUser? @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+
+  @@index([customerId])
+  @@index([adminId])
+  @@index([expiresAt])
+}
+
+model AdminUser {
+  id           String  @id @default(cuid())
+  username     String  @unique
+  // scrypt hash — see src/lib/auth/password.ts
+  passwordHash String
+  role         String  @default("admin") // admin | staff
+  active       Boolean @default(true)
+
+  sessions Session[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Cart
+// ---------------------------------------------------------------------------
+
+model Cart {
+  id String @id @default(cuid())
+
+  // Anonymous carts are keyed by a cookie token until the customer verifies a
+  // phone number, at which point customerId is filled in.
+  token      String  @unique
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  items CartItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([customerId])
+}
+
+model CartItem {
+  id     String @id @default(cuid())
+  cartId String
+  cart   Cart   @relation(fields: [cartId], references: [id], onDelete: Cascade)
+
+  variantId String
+  variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  quantity  Int @default(1)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([cartId, variantId])
+}
+
+// ---------------------------------------------------------------------------
+// Orders and payments
+// ---------------------------------------------------------------------------
+
+model Order {
+  id          String @id @default(cuid())
+  orderNumber String @unique
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+
+  // Address is snapshotted at order time so editing the saved address later
+  // does not rewrite history.
+  shipRecipientName String
+  shipPhone         String
+  shipAddressLine   String
+  shipArea          String
+  shipIsland        String @default("")
+  shipInstructions  String?
+
+  subtotalMinor    Int
+  deliveryFeeMinor Int
+  discountMinor    Int @default(0)
+  totalMinor       Int
+  currency         String @default("MVR")
+
+  // pending | confirmed | processing | packed | out_for_delivery | delivered | cancelled
+  status        String @default("pending")
+  // unpaid | pending | paid | failed | refunded
+  paymentStatus String @default("unpaid")
+
+  items    OrderItem[]
+  payments Payment[]
+  events   OrderEvent[]
+  inventoryTransactions InventoryTransaction[]
+
+  placedAt  DateTime  @default(now())
+  paidAt    DateTime?
+  cancelledAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([customerId, placedAt])
+  @@index([status])
+  @@index([paymentStatus])
+}
+
+model OrderItem {
+  id      String @id @default(cuid())
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  variantId String?
+  variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+
+  // Product details snapshotted at order time.
+  sku         String
+  productName String
+  size        String
+  color       String
+  imageUrl    String?
+  unitPriceMinor Int
+  quantity    Int
+  lineTotalMinor Int
+
+  @@index([orderId])
+}
+
+model Payment {
+  id      String @id @default(cuid())
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  provider      String // manual | gateway name
+  method        String // bank_transfer | cash_on_delivery | card | wallet
+  amountMinor   Int
+  currency      String @default("MVR")
+  // initiated | pending | succeeded | failed | refunded
+  status        String @default("initiated")
+  providerRef   String?
+  // Provider response, minus anything sensitive.
+  providerPayload Json?
+  failureReason String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([providerRef])
+}
+
+model OrderEvent {
+  id      String @id @default(cuid())
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  status    String
+  note      String?
+  actor     String? // "system", admin username, or "customer"
+  createdAt DateTime @default(now())
+
+  @@index([orderId, createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// Store configuration
+// ---------------------------------------------------------------------------
+
+/// Key/value store for business configuration so nothing business-critical is
+/// hardcoded in the UI. Read through src/lib/settings.ts, which applies
+/// typed defaults for keys that have not been set yet.
+model StoreSetting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+}

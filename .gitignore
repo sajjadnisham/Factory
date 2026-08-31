@@ -1,0 +1,25 @@
+node_modules/
+.next/
+out/
+build/
+dist/
+
+# Environment / secrets — never commit real credentials
+.env
+.env.local
+.env.*.local
+*.pem
+service-account*.json
+
+# Local development stock folder contents (structure is kept, images are not)
+/stock/**/*.jpg
+/stock/**/*.jpeg
+/stock/**/*.png
+/stock/**/*.webp
+
+# Logs and OS noise
+npm-debug.log*
+yarn-error.log*
+.DS_Store
+*.tsbuildinfo
+next-env.d.ts

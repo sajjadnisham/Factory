@@ -1,0 +1,15 @@
+{
+  "sku": "TSHIRT-001",
+  "type": "tshirt",
+  "name": "Oversized Basic",
+  "category": "T-Shirts",
+  "price": 750,
+  "currency": "MVR",
+  "colors": ["Black"],
+  "sizes": ["S", "M", "L", "XL", "XXL"],
+  "description": "Heavyweight oversized cotton tee with a boxy drop-shoulder cut. Pre-shrunk, built to hold its shape.",
+  "featured": true,
+  "newArrival": true,
+  "active": true,
+  "stock": 25
+}

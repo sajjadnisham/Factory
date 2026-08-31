@@ -1,0 +1,261 @@
+@import "tailwindcss";
+
+/*
+ * Design system — modern men's streetwear.
+ *
+ * Foundation is black / dark grey / grey / white. Yellow and blue are accents
+ * only: CTAs, badges, active states. Everything below is a token so the store
+ * owner's final brand colours are a one-file change.
+ */
+
+@theme {
+  --color-ink: #0a0a0a;
+  --color-ink-soft: #1c1c1e;
+  --color-graphite: #2e2e32;
+  --color-steel: #6b6b73;
+  --color-mist: #b8b8bf;
+  --color-paper: #f4f4f2;
+  --color-white: #ffffff;
+
+  --color-volt: #ffd400;
+  --color-volt-deep: #e5be00;
+  --color-electric: #1358ff;
+  --color-electric-deep: #0a3fc4;
+
+  --color-success: #128a4a;
+  --color-danger: #c62828;
+
+  --font-display: "Archivo Black", "Arial Black", "Helvetica Neue", sans-serif;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  /* Comic-card system: hard borders and offset shadows, no blur. */
+  --radius-card: 14px;
+  --border-comic: 2.5px;
+  --shadow-comic: 4px 4px 0 var(--color-ink);
+  --shadow-comic-lg: 6px 6px 0 var(--color-ink);
+}
+
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    /* Stops iOS Safari inflating text in landscape. */
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    /* Bottom nav is fixed; keep the last section reachable above it. */
+    padding-bottom: env(safe-area-inset-bottom);
+    overscroll-behavior-y: none;
+  }
+
+  h1, h2, h3, .display {
+    font-family: var(--font-display);
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+  }
+
+  /* Inputs must never be under 16px on iOS or the browser zooms on focus. */
+  input, select, textarea {
+    font-size: 16px;
+  }
+
+  button, a {
+    touch-action: manipulation;
+  }
+}
+
+@layer components {
+  /* --- Comic card ------------------------------------------------------- */
+  .comic-card {
+    background: var(--color-white);
+    border: var(--border-comic) solid var(--color-ink);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-comic);
+    transition: transform 120ms ease, box-shadow 120ms ease;
+  }
+
+  .comic-card:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 var(--color-ink);
+  }
+
+  /* --- Sticker label ---------------------------------------------------- */
+  .sticker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    border: 2px solid var(--color-ink);
+    border-radius: 999px;
+    font-family: var(--font-display);
+    font-size: 0.5625rem;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    padding: 0.25rem 0.4rem;
+    text-transform: uppercase;
+    box-shadow: 2px 2px 0 var(--color-ink);
+  }
+
+  .sticker-new { background: var(--color-volt); color: var(--color-ink); }
+  .sticker-sale { background: var(--color-electric); color: var(--color-white); }
+  .sticker-out { background: var(--color-graphite); color: var(--color-white); }
+  .sticker-low { background: var(--color-white); color: var(--color-ink); }
+
+  /* --- Buttons ---------------------------------------------------------- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border: var(--border-comic) solid var(--color-ink);
+    border-radius: 10px;
+    box-shadow: var(--shadow-comic);
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+    /* 44px min target — thumbs, not cursors. */
+    min-height: 44px;
+    padding: 0.625rem 1rem;
+    transition: transform 100ms ease, box-shadow 100ms ease;
+  }
+
+  .btn:active:not(:disabled) {
+    transform: translate(3px, 3px);
+    box-shadow: 1px 1px 0 var(--color-ink);
+  }
+
+  .btn:disabled {
+    opacity: 0.45;
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+
+  .btn-primary { background: var(--color-volt); color: var(--color-ink); }
+  .btn-dark { background: var(--color-ink); color: var(--color-white); }
+  .btn-electric { background: var(--color-electric); color: var(--color-white); }
+  .btn-ghost { background: var(--color-white); color: var(--color-ink); }
+
+  /* --- Form fields ------------------------------------------------------ */
+  .field {
+    width: 100%;
+    background: var(--color-white);
+    border: var(--border-comic) solid var(--color-ink);
+    border-radius: 10px;
+    padding: 0.75rem 0.875rem;
+    min-height: 48px;
+    outline: none;
+  }
+
+  .field:focus-visible {
+    box-shadow: 0 0 0 3px var(--color-volt);
+  }
+
+  .field-label {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.375rem;
+    color: var(--color-graphite);
+  }
+
+  /* --- Focus visibility (keyboard users) -------------------------------- */
+  a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
+    outline: 3px solid var(--color-electric);
+    outline-offset: 2px;
+  }
+
+  /* --- Product grid ----------------------------------------------------- */
+  /*
+   * Three products per row on mobile is a hard requirement from the brief.
+   * The gap shrinks below 360px so cards stay usable at 320px rather than
+   * dropping to two columns.
+   */
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+
+  @media (max-width: 359px) {
+    .product-grid { gap: 0.375rem; }
+  }
+
+  @media (min-width: 768px) {
+    .product-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 1rem;
+    }
+  }
+
+  @media (min-width: 1100px) {
+    .product-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  }
+
+  /* Horizontal swipe rails on the homepage. */
+  .rail {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 42%;
+    gap: 0.625rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    padding-bottom: 0.25rem;
+  }
+
+  .rail::-webkit-scrollbar { display: none; }
+  .rail > * { scroll-snap-align: start; }
+
+  @media (min-width: 640px) { .rail { grid-auto-columns: 30%; } }
+  @media (min-width: 1024px) { .rail { grid-auto-columns: 20%; } }
+
+  /* --- Section heading -------------------------------------------------- */
+  .section-title {
+    font-family: var(--font-display);
+    font-size: 1.375rem;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  /* --- Image swiper ----------------------------------------------------- */
+  .swipe-track {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .swipe-track::-webkit-scrollbar { display: none; }
+
+  .swipe-slide {
+    flex: 0 0 100%;
+    scroll-snap-align: center;
+  }
+
+  /* Diagonal caution stripes used behind headings. */
+  .stripes {
+    background-image: repeating-linear-gradient(
+      45deg,
+      var(--color-ink) 0 8px,
+      transparent 8px 16px
+    );
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "sku": "TSHIRT-002",
+  "type": "tshirt",
+  "name": "Boxy Graphic Tee",
+  "price": 850,
+  "comparePrice": 1100,
+  "colors": ["Black", "Grey"],
+  "sizes": ["M", "L", "XL"],
+  "description": "Screen-printed graphic on a mid-weight boxy body.",
+  "newArrival": true,
+  "variants": [
+    { "size": "M", "color": "Black", "stock": 6 },
+    { "size": "L", "color": "Black", "stock": 8 },
+    { "size": "XL", "color": "Black", "stock": 2 },
+    { "size": "M", "color": "Grey", "stock": 4 },
+    { "size": "L", "color": "Grey", "stock": 0 }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "sku": "PANTS-001",
+  "type": "pants",
+  "name": "Cargo Utility Pant",
+  "price": 1250,
+  "colors": ["Dark Grey"],
+  "sizes": ["30", "32", "34", "36"],
+  "description": "Six-pocket cargo with a tapered leg and reinforced knees.",
+  "featured": true,
+  "stock": 16
+}
