@@ -2,6 +2,7 @@
 
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { verifyPassword } from "@/lib/auth/password";
@@ -90,6 +91,29 @@ export async function adminLoginAction(
   await resetRateLimit(`admin:login:user:${parsed.data.username.toLowerCase()}`);
   await createAdminSession(admin.id);
   return { ok: true };
+}
+
+/**
+ * Form-action wrapper for the login form.
+ *
+ * Using a `<form action={…}>` rather than an onClick handler means the login
+ * works before React hydrates (and if its JavaScript never arrives at all) —
+ * the browser posts the form natively and Next.js routes it to this action.
+ */
+export async function adminLoginFormAction(
+  _previous: { error: string | null },
+  formData: FormData,
+): Promise<{ error: string | null }> {
+  const result = await adminLoginAction({
+    username: String(formData.get("username") ?? ""),
+    password: String(formData.get("password") ?? ""),
+  });
+
+  if (!result.ok) return { error: result.error };
+
+  // Redirect rather than returning success, so the signed-in dashboard renders
+  // on the same request for a no-JavaScript client.
+  redirect("/admin");
 }
 
 export async function adminLogoutAction(): Promise<void> {

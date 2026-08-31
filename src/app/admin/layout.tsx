@@ -27,8 +27,11 @@ export default async function AdminLayout({
 }) {
   const admin = await getCurrentAdmin();
 
-  // The login page renders its own shell; everything else needs the chrome.
-  if (!admin) return <>{children}</>;
+  // Signed out, the only page here is the login form — no admin navigation to
+  // show, and deliberately no storefront chrome either.
+  if (!admin) {
+    return <div className="min-h-dvh bg-[var(--color-paper)]">{children}</div>;
+  }
 
   return (
     <div className="min-h-dvh bg-[var(--color-paper)]">

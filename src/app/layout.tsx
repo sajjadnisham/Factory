@@ -1,14 +1,17 @@
 import type { Metadata, Viewport } from "next";
 import { Archivo_Black, Inter } from "next/font/google";
 
-import { BottomNav } from "@/components/layout/bottom-nav";
-import { SiteFooter } from "@/components/layout/site-footer";
-import { SiteHeader } from "@/components/layout/site-header";
-import { getCart } from "@/lib/cart";
-import { getCategories } from "@/lib/catalog";
 import { getSettings } from "@/lib/settings";
 
 import "./globals.css";
+
+/**
+ * Root shell only: fonts, global CSS and document metadata.
+ *
+ * Store chrome (header, footer, bottom nav) lives in the (storefront) route
+ * group instead, so the admin area does not render customer navigation — and
+ * does not pay for the cart and category queries that chrome needs.
+ */
 
 // Archivo Black for headings (bold, urban, fashion-forward); Inter for body
 // text, which stays readable at the small sizes a 3-across grid forces.
@@ -51,42 +54,14 @@ export const viewport: Viewport = {
   themeColor: "#0a0a0a",
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [settings, categories, cart] = await Promise.all([
-    getSettings(),
-    getCategories(),
-    getCart(),
-  ]);
-
   return (
     <html lang="en" className={`${display.variable} ${body.variable}`}>
-      <body className="min-h-dvh">
-        <a
-          href="#main"
-          className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:rounded focus:bg-[var(--color-volt)] focus:px-3 focus:py-2"
-        >
-          Skip to content
-        </a>
-
-        <SiteHeader
-          storeName={settings.logoText}
-          categories={categories}
-          cartCount={cart.itemCount}
-          promoMessage={settings.promoMessage}
-        />
-
-        {/* Bottom padding clears the fixed mobile nav. */}
-        <main id="main" className="pb-24 md:pb-8">
-          {children}
-        </main>
-
-        <SiteFooter settings={settings} categories={categories} />
-        <BottomNav cartCount={cart.itemCount} />
-      </body>
+      <body className="min-h-dvh">{children}</body>
     </html>
   );
 }

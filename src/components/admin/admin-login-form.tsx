@@ -1,35 +1,24 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
 
-import { adminLoginAction } from "@/app/actions/admin-actions";
+import { adminLoginFormAction } from "@/app/actions/admin-actions";
 
+/**
+ * Progressively enhanced: the browser can post this form natively, so signing
+ * in works before React hydrates and even if its JavaScript never loads.
+ */
 export function AdminLoginForm() {
-  const router = useRouter();
-  const [pending, startTransition] = useTransition();
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-
-  function submit(event: React.FormEvent) {
-    event.preventDefault();
-    setError(null);
-    startTransition(async () => {
-      const result = await adminLoginAction({ username, password });
-      if (!result.ok) {
-        setError(result.error);
-        return;
-      }
-      router.refresh();
-    });
-  }
+  const [state, formAction] = useActionState(adminLoginFormAction, {
+    error: null as string | null,
+  });
 
   return (
-    <form onSubmit={submit} className="comic-card grid gap-3 p-4">
-      {error && (
+    <form action={formAction} className="comic-card grid gap-3 p-4">
+      {state.error && (
         <p role="alert" className="rounded border-2 border-[var(--color-danger)] bg-white p-2.5 text-sm">
-          {error}
+          {state.error}
         </p>
       )}
 
@@ -37,10 +26,10 @@ export function AdminLoginForm() {
         <label className="field-label" htmlFor="admin-user">Username</label>
         <input
           id="admin-user"
+          name="username"
           className="field"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
           autoComplete="username"
+          required
         />
       </div>
 
@@ -48,17 +37,24 @@ export function AdminLoginForm() {
         <label className="field-label" htmlFor="admin-pass">Password</label>
         <input
           id="admin-pass"
+          name="password"
           type="password"
           className="field"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
           autoComplete="current-password"
+          required
         />
       </div>
 
-      <button type="submit" disabled={pending} className="btn btn-dark w-full">
-        {pending ? "Signing in…" : "Sign in"}
-      </button>
+      <SubmitButton />
     </form>
+  );
+}
+
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <button type="submit" disabled={pending} className="btn btn-dark w-full">
+      {pending ? "Signing in…" : "Sign in"}
+    </button>
   );
 }
