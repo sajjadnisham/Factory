@@ -21,5 +21,13 @@ else
   echo "[entrypoint] WARNING: migrations failed — starting anyway, check DATABASE_URL" >&2
 fi
 
+# First-boot provisioning: creates the admin user and, when asked, loads the
+# demo catalogue. Both are conditional and skip themselves once done, so this
+# costs a fraction of a second on subsequent boots. It exists because Render's
+# free plan has no shell to run them from by hand.
+echo "[entrypoint] running bootstrap…"
+node node_modules/tsx/dist/cli.mjs scripts/bootstrap.ts || \
+  echo "[entrypoint] WARNING: bootstrap failed — starting anyway" >&2
+
 echo "[entrypoint] starting server"
 exec node server.js

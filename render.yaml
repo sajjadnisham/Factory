@@ -4,12 +4,9 @@
 # at this repository. Render reads this file, provisions both services and
 # wires DATABASE_URL. Migrations run from the container entrypoint on boot.
 #
-# After the first deploy, open a shell on the web service and run:
-#   ADMIN_INITIAL_USERNAME=admin ADMIN_INITIAL_PASSWORD='<long password>' \
-#     npx tsx scripts/create-admin.ts
-#   npx tsx scripts/sync-stock.ts
-# — or, to load the demo catalogue and orders:
-#   ALLOW_SEED_IN_PRODUCTION=1 npx tsx scripts/seed.ts
+# No post-deploy shell commands are needed: the container provisions itself on
+# first boot from SEED_DEMO_DATA and ADMIN_INITIAL_PASSWORD below. Render's free
+# plan has no web shell, so anything requiring one would be unreachable.
 
 databases:
   - name: mensstore-db
@@ -48,3 +45,17 @@ services:
       # SMS_HTTP_ENDPOINT and SMS_HTTP_API_KEY) before taking real orders.
       - key: OTP_PROVIDER
         value: demo
+
+      # First-boot provisioning, because the free plan has no shell to run the
+      # setup commands from. Both are handled by the container entrypoint.
+      #
+      # Loads the 18-product demo catalogue with customers and order history,
+      # once, only while the catalogue is empty.
+      - key: SEED_DEMO_DATA
+        value: "1"
+      # Creates the /admin login. Set the password in the dashboard, then clear
+      # it from the environment once the user exists.
+      - key: ADMIN_INITIAL_USERNAME
+        value: admin
+      - key: ADMIN_INITIAL_PASSWORD
+        sync: false
