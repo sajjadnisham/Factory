@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Archivo_Black, Inter } from "next/font/google";
 
+import { appUrl } from "@/lib/env";
 import { getSettings } from "@/lib/settings";
 
 import "./globals.css";
@@ -31,7 +32,7 @@ const body = Inter({
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSettings();
   return {
-    metadataBase: new URL(process.env.APP_URL ?? "http://localhost:3000"),
+    metadataBase: new URL(appUrl()),
     title: {
       default: `${settings.storeName} — ${settings.tagline}`,
       template: `%s | ${settings.storeName}`,

@@ -6,7 +6,13 @@ import { z } from "zod";
  */
 const serverSchema = z.object({
   DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
-  APP_URL: z.string().url().default("http://localhost:3000"),
+  // Render injects RENDER_EXTERNAL_URL with the service's real public URL, so a
+  // deployment works correctly even when APP_URL was guessed wrong or left
+  // blank. An explicit APP_URL still wins.
+  APP_URL: z.preprocess(
+    (value) => value || process.env.RENDER_EXTERNAL_URL || "http://localhost:3000",
+    z.string().url(),
+  ),
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
 
   SESSION_SECRET: z
@@ -37,6 +43,22 @@ const serverSchema = z.object({
 });
 
 export type ServerEnv = z.infer<typeof serverSchema>;
+
+/**
+ * The site's public origin, for metadata, the sitemap and payment return URLs.
+ *
+ * Deliberately reads process.env directly instead of going through env(): these
+ * callers run while pages are prerendered at build time, where the full
+ * configuration (a database URL, a session secret) does not exist yet and
+ * validating it would fail the build.
+ */
+export function appUrl(): string {
+  return (
+    process.env.APP_URL ||
+    process.env.RENDER_EXTERNAL_URL ||
+    "http://localhost:3000"
+  );
+}
 
 let cached: ServerEnv | null = null;
 

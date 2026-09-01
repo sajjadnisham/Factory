@@ -1,12 +1,13 @@
 import type { MetadataRoute } from "next";
 
 import { db } from "@/lib/db";
+import { appUrl } from "@/lib/env";
 
 export const dynamic = "force-dynamic";
 
 /** Includes every active product, so newly synced products get indexed. */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const base = process.env.APP_URL ?? "http://localhost:3000";
+  const base = appUrl();
 
   const [products, categories] = await Promise.all([
     db.product.findMany({
