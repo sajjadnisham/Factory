@@ -150,24 +150,32 @@ export async function queryProducts(query: ProductQuery = {}): Promise<ProductPa
     ];
   }
 
+  // Size, colour and availability are variant-level: a product matches when any
+  // of its variants does.
   const variantFilters: Record<string, unknown> = {};
   if (query.colors?.length) variantFilters.color = { in: query.colors };
   if (query.sizes?.length) variantFilters.size = { in: query.sizes };
-  if (query.minPriceMinor !== undefined || query.maxPriceMinor !== undefined) {
-    variantFilters.priceMinor = {
-      ...(query.minPriceMinor !== undefined ? { gte: query.minPriceMinor } : {}),
-      ...(query.maxPriceMinor !== undefined ? { lte: query.maxPriceMinor } : {}),
-    };
-  }
   if (query.inStockOnly) variantFilters.stock = { gt: 0 };
   if (Object.keys(variantFilters).length > 0) {
     where.variants = { some: variantFilters };
   }
 
+  // Price filters use the denormalised product columns rather than a variant
+  // subquery, so "under MVR 800" means the product's displayed (cheapest) price
+  // is under 800 — which is what the shopper sees on the card.
+  if (query.minPriceMinor !== undefined) {
+    where.maxPriceMinor = { gte: query.minPriceMinor };
+  }
+  if (query.maxPriceMinor !== undefined) {
+    where.minPriceMinor = { lte: query.maxPriceMinor };
+  }
+
   const orderBy = (() => {
     switch (query.sort) {
       case "price_asc":
-        return [{ variants: { _count: "desc" } }, { createdAt: "desc" }] as never;
+        return [{ minPriceMinor: "asc" }, { createdAt: "desc" }] as never;
+      case "price_desc":
+        return [{ minPriceMinor: "desc" }, { createdAt: "desc" }] as never;
       case "featured":
         return [{ featured: "desc" }, { createdAt: "desc" }] as never;
       case "newest":
@@ -187,16 +195,7 @@ export async function queryProducts(query: ProductQuery = {}): Promise<ProductPa
     db.product.count({ where }),
   ]);
 
-  let products = rows.map(toCatalogProduct);
-
-  // Price sorting happens here because the sort key lives on variants: the
-  // displayed price is the minimum across a product's variants, which SQL
-  // cannot order by without a much heavier query.
-  if (query.sort === "price_asc") {
-    products = products.sort((a, b) => a.priceMinor - b.priceMinor);
-  } else if (query.sort === "price_desc") {
-    products = products.sort((a, b) => b.priceMinor - a.priceMinor);
-  }
+  const products = rows.map(toCatalogProduct);
 
   return {
     products,

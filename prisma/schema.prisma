@@ -48,6 +48,13 @@ model Product {
   active           Boolean @default(true)
   featured         Boolean @default(false)
   newArrival       Boolean @default(false)
+  // Cheapest and dearest variant price, denormalised from the variants at sync
+  // time. The storefront shows the minimum, and sorting or filtering by it in
+  // SQL is only possible with the value on the product row — sorting a page of
+  // results in JavaScript would only order that page, not the whole catalogue.
+  minPriceMinor    Int     @default(0)
+  maxPriceMinor    Int     @default(0)
+
   // Raw parsed metadata, kept for admin debugging of parse results.
   sourceMetadata   Json?
   // Hash of parsed metadata + image list; lets sync skip untouched products.
@@ -64,6 +71,7 @@ model Product {
 
   @@index([active, newArrival])
   @@index([active, featured])
+  @@index([active, minPriceMinor])
   @@index([type])
 }
 

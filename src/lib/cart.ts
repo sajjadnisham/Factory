@@ -46,6 +46,32 @@ const EMPTY_CART: CartSummary = {
   hasIssues: false,
 };
 
+/**
+ * Which cart belongs to this visitor: the one their cookie points at, or — for
+ * a signed-in customer whose cookie is missing or new — the one on their
+ * account. Reads and writes share this so they can never disagree about which
+ * cart is being operated on.
+ */
+function cartWhere(token: string | null, customerId: string | null) {
+  const clauses = [];
+  if (customerId) clauses.push({ customerId });
+  if (token) clauses.push({ token });
+  return { OR: clauses };
+}
+
+/** Resolves the visitor's cart for a mutation, or null when there isn't one. */
+async function findWritableCart(): Promise<{ id: string } | null> {
+  const token = await readCartToken();
+  const customer = await getCurrentCustomer();
+  if (!token && !customer) return null;
+
+  return db.cart.findFirst({
+    where: cartWhere(token, customer?.id ?? null),
+    orderBy: { updatedAt: "desc" },
+    select: { id: true },
+  });
+}
+
 /** Reads the cart without creating one — safe for render paths. */
 export async function getCart(): Promise<CartSummary> {
   const token = await readCartToken();
@@ -53,9 +79,7 @@ export async function getCart(): Promise<CartSummary> {
   if (!token && !customer) return EMPTY_CART;
 
   const cart = await db.cart.findFirst({
-    where: customer
-      ? { OR: [{ customerId: customer.id }, ...(token ? [{ token }] : [])] }
-      : { token: token! },
+    where: cartWhere(token, customer?.id ?? null),
     orderBy: { updatedAt: "desc" },
     include: {
       items: {
@@ -144,10 +168,7 @@ export async function updateCartLine(
   variantId: string,
   quantity: number,
 ): Promise<{ ok: true } | { ok: false; error: string }> {
-  const token = await readCartToken();
-  if (!token) return { ok: false, error: "Your cart is empty." };
-
-  const cart = await db.cart.findUnique({ where: { token } });
+  const cart = await findWritableCart();
   if (!cart) return { ok: false, error: "Your cart is empty." };
 
   if (quantity <= 0) {
@@ -169,9 +190,7 @@ export async function updateCartLine(
 }
 
 export async function removeFromCart(variantId: string): Promise<void> {
-  const token = await readCartToken();
-  if (!token) return;
-  const cart = await db.cart.findUnique({ where: { token } });
+  const cart = await findWritableCart();
   if (!cart) return;
   await db.cartItem.deleteMany({ where: { cartId: cart.id, variantId } });
 }

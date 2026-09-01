@@ -369,14 +369,15 @@ class OutOfStockError extends Error {
  * placement transaction, and the unique index on orderNumber is the final guard.
  */
 async function nextOrderNumber(tx: Prisma.TransactionClient): Promise<string> {
-  const latest = await tx.order.findFirst({
-    orderBy: { orderNumber: "desc" },
-    select: { orderNumber: true },
-  });
+  // Ordering by the text column would compare lexicographically, where "99999"
+  // sorts above "100000" — so the sequence would stall and collide the moment
+  // it reached six digits. Cast to a number and take the true maximum.
+  const [row] = await tx.$queryRaw<{ max: bigint | null }[]>`
+    SELECT MAX(CAST("orderNumber" AS BIGINT)) AS max
+    FROM "Order"
+    WHERE "orderNumber" ~ '^[0-9]+$'
+  `;
 
-  const current = latest
-    ? Number.parseInt(latest.orderNumber.replace(/\D/g, ""), 10)
-    : Number.NaN;
-
-  return String(Number.isFinite(current) && current >= 10_000 ? current + 1 : 10_001);
+  const current = row?.max === null || row?.max === undefined ? 0 : Number(row.max);
+  return String(current >= 10_000 ? current + 1 : 10_001);
 }

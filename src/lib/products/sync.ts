@@ -144,7 +144,28 @@ export async function syncStock(
       }
     }
 
-    report.productsRemoved = await deactivateMissingProducts(seenFolderIds);
+    // A scan that returned nothing is far more likely to be a provider fault (a
+    // transient API error, a folder id that changed, revoked sharing) than the
+    // owner emptying their entire STOCK folder. Deactivating on that signal
+    // would blank the storefront, so it is refused and reported instead.
+    if (folders.length === 0) {
+      const activeProducts = await db.product.count({ where: { active: true } });
+      if (activeProducts > 0) {
+        await recordIssue(
+          { id: "", name: "STOCK" },
+          null,
+          {
+            severity: "error",
+            message:
+              `STOCK returned no product folders while ${activeProducts} product(s) are live. ` +
+              "Nothing was deactivated — check the folder id and sharing permissions, then sync again.",
+          },
+        );
+        report.invalidProducts += 1;
+      }
+    } else {
+      report.productsRemoved = await deactivateMissingProducts(seenFolderIds);
+    }
 
     report.durationMs = Date.now() - startedAt;
     await db.syncRun.update({
@@ -203,6 +224,9 @@ async function upsertProduct(parsed: ParsedProduct): Promise<UpsertOutcome> {
       return { created: false, changed: false, imagesUpdated: 0 };
     }
 
+    // Denormalised so the storefront can sort and filter by price in SQL.
+    const prices = parsed.variants.map((v) => v.priceMinor);
+
     const data = {
       externalFolderId: parsed.externalFolderId,
       externalFolderName: parsed.externalFolderName,
@@ -215,6 +239,8 @@ async function upsertProduct(parsed: ParsedProduct): Promise<UpsertOutcome> {
       featured: parsed.featured,
       newArrival: parsed.newArrival,
       categoryId: category.id,
+      minPriceMinor: Math.min(...prices),
+      maxPriceMinor: Math.max(...prices),
       sourceMetadata: parsed.sourceMetadata as Prisma.InputJsonValue,
       contentHash: parsed.contentHash,
     };
@@ -368,12 +394,16 @@ async function ensureCategory(type: ProductType, label: string) {
   });
 }
 
+/**
+ * Deactivates products whose folder is gone. Only ever called with a non-empty
+ * list — see the empty-scan guard in syncStock, which is what stops a failed
+ * listing from emptying the storefront.
+ */
 async function deactivateMissingProducts(seenFolderIds: string[]): Promise<number> {
+  if (seenFolderIds.length === 0) return 0;
+
   const result = await db.product.updateMany({
-    where: {
-      active: true,
-      externalFolderId: { notIn: seenFolderIds.length > 0 ? seenFolderIds : ["__none__"] },
-    },
+    where: { active: true, externalFolderId: { notIn: seenFolderIds } },
     data: { active: false },
   });
   return result.count;

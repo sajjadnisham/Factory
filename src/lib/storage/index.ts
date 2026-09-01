@@ -32,7 +32,16 @@ export function getStorageProvider(): StorageProvider {
   return cached;
 }
 
-/** Test seam — resets the memoised provider. */
+/**
+ * Test seam. Pass a provider to force it, or null to fall back to the
+ * configured one. Needed because env() memoises its configuration, so changing
+ * STORAGE_PROVIDER or LOCAL_STOCK_PATH at runtime has no effect on its own.
+ */
+export function setStorageProvider(provider: StorageProvider | null): void {
+  cached = provider;
+}
+
+/** Test seam — drops the memoised provider so the next call rebuilds it. */
 export function resetStorageProvider(): void {
   cached = null;
 }
