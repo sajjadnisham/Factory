@@ -81,7 +81,22 @@ export const DEFAULT_SETTINGS: StoreSettings = {
 };
 
 export async function getSettings(): Promise<StoreSettings> {
-  const rows = await db.storeSetting.findMany();
+  let rows: { key: string; value: unknown }[];
+
+  try {
+    rows = await db.storeSetting.findMany();
+  } catch (error) {
+    // The defaults above are a complete, working configuration, so presentation
+    // never depends on the database being reachable. This matters at build
+    // time: `next build` prerenders pages whose metadata reads settings, and a
+    // container image is built without a database to connect to.
+    console.warn(
+      "[settings] falling back to defaults — store settings could not be read:",
+      error instanceof Error ? error.message : error,
+    );
+    return { ...DEFAULT_SETTINGS };
+  }
+
   const stored = Object.fromEntries(rows.map((r) => [r.key, r.value]));
 
   // Merge per key so a partially configured store still gets defaults for the

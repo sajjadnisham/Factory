@@ -3,6 +3,10 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // Emits a self-contained server bundle with only the dependencies actually
+  // used, which is what the Docker runtime stage copies. Keeps the image small
+  // and means the runner never needs a full node_modules install.
+  output: "standalone",
   images: {
     // Product images are served through /api/images/[id], which streams from the
     // configured storage provider. Remote patterns are only needed when a CDN or

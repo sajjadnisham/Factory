@@ -1,0 +1,51 @@
+# Render Blueprint — deploys the storefront and a PostgreSQL database together.
+#
+# Use it from https://dashboard.render.com/select-repo?type=blueprint, pointing
+# at this repository. Render reads this file, provisions both services, wires
+# DATABASE_URL, and runs migrations before each release.
+#
+# After the first deploy, open a shell on the web service and run:
+#   ADMIN_INITIAL_USERNAME=admin ADMIN_INITIAL_PASSWORD='<long password>' \
+#     npx tsx scripts/admin:create
+#   npx tsx scripts/sync-stock.ts
+# — or, to load the demo catalogue and orders:
+#   ALLOW_SEED_IN_PRODUCTION=1 npx tsx scripts/seed.ts
+
+databases:
+  - name: mensstore-db
+    databaseName: mensstore
+    user: storeapp
+    plan: free
+
+services:
+  - type: web
+    name: mensstore
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /
+    # Schema changes are applied before the new version starts serving.
+    preDeployCommand: npx prisma migrate deploy
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: mensstore-db
+          property: connectionString
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: APP_URL
+        sync: false        # set to the service URL once Render assigns it
+      - key: STORAGE_PROVIDER
+        value: local
+      - key: LOCAL_STOCK_PATH
+        value: ./stock
+      - key: PAYMENT_PROVIDER
+        value: manual
+      # An SMS provider is required in production — the app refuses to start
+      # with the console provider. See the OTP section of the README.
+      - key: OTP_PROVIDER
+        sync: false
+      - key: SMS_HTTP_ENDPOINT
+        sync: false
+      - key: SMS_HTTP_API_KEY
+        sync: false

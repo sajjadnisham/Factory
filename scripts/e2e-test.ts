@@ -186,7 +186,11 @@ async function main() {
   check("first order placed", order1.ok, order1.ok ? "" : order1.error);
   if (!order1.ok) throw new Error("cannot continue without an order");
 
-  check("order number assigned", /^\d{5}$/.test(order1.orderNumber));
+  check(
+    "order number assigned",
+    /^\d{5,}$/.test(order1.orderNumber),
+    order1.orderNumber,
+  );
 
   const afterOrder = await db.productVariant.findUnique({ where: { id: variantM.id } });
   check(
@@ -537,19 +541,31 @@ async function main() {
   if (boundaryVariant) {
     // A throwaway order carries the boundary number. Renumbering a real order
     // would permanently move the live sequence.
-    await db.order.create({
-      data: {
-        orderNumber: "99999",
-        customerId: boundaryCustomer.id,
-        shipRecipientName: "Boundary Tester",
-        shipPhone: "+9607770004",
-        shipAddressLine: "Test address",
-        shipArea: "Malé",
-        subtotalMinor: 0,
-        deliveryFeeMinor: 0,
-        totalMinor: 0,
-      },
-    });
+    const existing = await db.order.findUnique({ where: { orderNumber: "99999" } });
+    if (!existing) {
+      await db.order.create({
+        data: {
+          orderNumber: "99999",
+          customerId: boundaryCustomer.id,
+          shipRecipientName: "Boundary Tester",
+          shipPhone: "+9607770004",
+          shipAddressLine: "Test address",
+          shipArea: "Malé",
+          subtotalMinor: 0,
+          deliveryFeeMinor: 0,
+          totalMinor: 0,
+        },
+      });
+    }
+
+    // The expectation is the numeric successor of the highest existing number,
+    // not a fixed value: the sequence keeps climbing across runs, and hardcoding
+    // "100000" would fail for a correct implementation once it passes it.
+    const maxRows = await db.$queryRaw<{ max: bigint | null }[]>`
+      SELECT MAX(CAST("orderNumber" AS BIGINT)) AS max FROM "Order"
+      WHERE "orderNumber" ~ '^[0-9]+$'
+    `;
+    const expected = String(Number(maxRows[0]?.max ?? 0) + 1);
 
     const rollover = await placeOrder({
       customerId: boundaryCustomer.id,
@@ -563,8 +579,18 @@ async function main() {
       paymentMethod: "cash_on_delivery",
     });
 
-    check("an order after #99999 gets #100000", rollover.ok && rollover.orderNumber === "100000",
-      rollover.ok ? rollover.orderNumber : rollover.error);
+    // With a "99999" row present, a lexicographic maximum would pick it over any
+    // six-digit number and hand back 100000 — either colliding with an existing
+    // order or silently rewinding the sequence.
+    check(
+      "numbering follows the numeric maximum, not the lexicographic one",
+      rollover.ok && rollover.orderNumber === expected,
+      rollover.ok ? `got ${rollover.orderNumber}, expected ${expected}` : rollover.error,
+    );
+    check(
+      "the new number is past the five-digit boundary",
+      rollover.ok && Number(rollover.orderNumber) > 99999,
+    );
   }
 
   // -------------------------------------------------------------------------
