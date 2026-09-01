@@ -20,7 +20,9 @@ services:
     runtime: docker
     dockerfilePath: ./Dockerfile
     plan: free
-    healthCheckPath: /
+    # Points at an endpoint that touches no database, so the platform sees a
+    # healthy service as soon as the port binds — before migrations finish.
+    healthCheckPath: /api/health
     # Migrations run from the container entrypoint rather than a
     # preDeployCommand, which Render offers on paid plans only.
     envVars:

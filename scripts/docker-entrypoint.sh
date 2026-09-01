@@ -1,33 +1,40 @@
 #!/bin/sh
-# Container entrypoint: bring the schema up to date, then serve.
+# Container entrypoint.
 #
-# Migrations run here rather than in a Render preDeployCommand, because that is
-# a paid-plan feature and this deploys on the free tier. `migrate deploy` is
-# idempotent — it applies only pending migrations and is a no-op once the
-# database is current — so running it on every boot is safe.
+# The server is started FIRST, before migrations and provisioning, so the port
+# binds in about two seconds instead of fifteen. That matters on a free plan:
+# the instance spins down when idle and cold-starts on the next visit, and every
+# second spent before binding is a second of 502s for whoever is waiting.
 #
-# Note for larger setups: with several instances starting at once, they would
-# race here. Prisma takes an advisory lock so only one applies the migrations,
-# but a dedicated release step is the better shape once you are off the free
-# plan.
+# The health check points at /api/health, which touches no database, so the
+# platform sees a healthy service immediately while the schema work finishes
+# alongside it. Ordering only matters on a first deploy against an empty
+# database, when there is no traffic to serve yet.
 set -e
 
+echo "[entrypoint] starting server"
+node server.js &
+SERVER_PID=$!
+
+# Hand shutdown signals to the server so deploys and spin-downs are clean.
+trap 'kill -TERM "$SERVER_PID" 2>/dev/null' TERM INT
+
+# `migrate deploy` applies only pending migrations and is a no-op once the
+# database is current, so this is cheap on every boot after the first.
 echo "[entrypoint] applying database migrations…"
 if node node_modules/prisma/build/index.js migrate deploy; then
   echo "[entrypoint] migrations up to date"
 else
-  # Failing hard here would leave the service down with no way in. Serving is
-  # better: the app still runs, and the logs say exactly what went wrong.
-  echo "[entrypoint] WARNING: migrations failed — starting anyway, check DATABASE_URL" >&2
+  # Failing hard would take down a server that is already serving. The logs say
+  # what went wrong; the store keeps answering.
+  echo "[entrypoint] WARNING: migrations failed — check DATABASE_URL" >&2
 fi
 
-# First-boot provisioning: creates the admin user and, when asked, loads the
-# demo catalogue. Both are conditional and skip themselves once done, so this
-# costs a fraction of a second on subsequent boots. It exists because Render's
-# free plan has no shell to run them from by hand.
+# Creates the admin user and, when asked, loads the demo catalogue. Both skip
+# themselves once done.
 echo "[entrypoint] running bootstrap…"
 node node_modules/tsx/dist/cli.mjs scripts/bootstrap.ts || \
-  echo "[entrypoint] WARNING: bootstrap failed — starting anyway" >&2
+  echo "[entrypoint] WARNING: bootstrap failed" >&2
 
-echo "[entrypoint] starting server"
-exec node server.js
+echo "[entrypoint] ready"
+wait "$SERVER_PID"
