@@ -41,11 +41,10 @@ services:
         value: ./stock
       - key: PAYMENT_PROVIDER
         value: manual
-      # An SMS provider is required in production — the app refuses to start
-      # with the console provider. See the OTP section of the README.
+      # Demo mode: no SMS gateway, verification codes are shown on screen and
+      # every page carries a banner saying so. This is an authentication bypass
+      # — anyone can sign in as any phone number — and exists only so the store
+      # can be shown to people. Switch to "http" with a real gateway (and add
+      # SMS_HTTP_ENDPOINT and SMS_HTTP_API_KEY) before taking real orders.
       - key: OTP_PROVIDER
-        sync: false
-      - key: SMS_HTTP_ENDPOINT
-        sync: false
-      - key: SMS_HTTP_API_KEY
-        sync: false
+        value: demo

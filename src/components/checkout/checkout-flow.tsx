@@ -53,6 +53,7 @@ export function CheckoutFlow({
   const [isReturning, setIsReturning] = useState(false);
 
   const [code, setCode] = useState("");
+  const [demoCode, setDemoCode] = useState<string | null>(null);
   const [cooldown, setCooldown] = useState(0);
   const [verifiedToken, setVerifiedToken] = useState<string | null>(null);
 
@@ -97,6 +98,9 @@ export function CheckoutFlow({
 
     setPhone(result.phone);
     setIsReturning(result.isReturning);
+    // Demo deployments have no SMS gateway, so the server hands the code back
+    // and it is shown below the field. Undefined for every real provider.
+    setDemoCode(result.demoCode ?? null);
     setCooldown(60);
     setStep("otp");
   }
@@ -245,6 +249,14 @@ export function CheckoutFlow({
             <strong>+960 {phoneInput}</strong>
             {isReturning && " — welcome back."}
           </p>
+
+          {demoCode && (
+            <p className="rounded-lg border-2 border-[var(--color-electric)] bg-white p-2.5 text-sm">
+              <span className="font-bold uppercase">Demo store</span> — no SMS was
+              sent. Your code is{" "}
+              <strong className="text-lg tracking-widest">{demoCode}</strong>
+            </p>
+          )}
 
           <div>
             <label className="field-label" htmlFor="co-code">Verification code</label>

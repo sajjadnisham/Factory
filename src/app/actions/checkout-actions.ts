@@ -37,7 +37,7 @@ const phoneSchema = z.string().min(6).max(20);
 
 export async function requestOtpAction(
   rawPhone: string,
-): Promise<CheckoutStepResult<{ phone: string; isReturning: boolean }>> {
+): Promise<CheckoutStepResult<{ phone: string; isReturning: boolean; demoCode?: string }>> {
   const parsed = phoneSchema.safeParse(rawPhone);
   if (!parsed.success) {
     return { ok: false, error: "Enter your phone number." };
@@ -59,7 +59,12 @@ export async function requestOtpAction(
     };
   }
 
-  return { ok: true, phone: phone.e164, isReturning: Boolean(existing) };
+  return {
+    ok: true,
+    phone: phone.e164,
+    isReturning: Boolean(existing),
+    ...(result.demoCode ? { demoCode: result.demoCode } : {}),
+  };
 }
 
 const verifySchema = z.object({
@@ -238,7 +243,7 @@ async function saveDefaultAddress(
 /** Passwordless login for the account area, outside checkout. */
 export async function loginRequestOtpAction(
   rawPhone: string,
-): Promise<CheckoutStepResult<{ phone: string }>> {
+): Promise<CheckoutStepResult<{ phone: string; demoCode?: string }>> {
   const phone = normalisePhone(rawPhone ?? "");
   if (!phone) return { ok: false, error: "Enter a valid Maldivian mobile number." };
 
@@ -246,7 +251,11 @@ export async function loginRequestOtpAction(
   if (!result.ok) {
     return { ok: false, error: result.error, retryAfterSeconds: result.retryAfterSeconds };
   }
-  return { ok: true, phone: phone.e164 };
+  return {
+    ok: true,
+    phone: phone.e164,
+    ...(result.demoCode ? { demoCode: result.demoCode } : {}),
+  };
 }
 
 export async function loginVerifyOtpAction(input: {

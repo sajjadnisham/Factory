@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { AdminLogout } from "@/components/admin/admin-logout";
+import { DemoBanner } from "@/components/layout/demo-banner";
 import { getCurrentAdmin } from "@/lib/auth/session";
 
 export const dynamic = "force-dynamic";
@@ -30,11 +31,17 @@ export default async function AdminLayout({
   // Signed out, the only page here is the login form — no admin navigation to
   // show, and deliberately no storefront chrome either.
   if (!admin) {
-    return <div className="min-h-dvh bg-[var(--color-paper)]">{children}</div>;
+    return (
+      <div className="min-h-dvh bg-[var(--color-paper)]">
+        <DemoBanner />
+        {children}
+      </div>
+    );
   }
 
   return (
     <div className="min-h-dvh bg-[var(--color-paper)]">
+      <DemoBanner />
       <header className="border-b-[2.5px] border-[var(--color-ink)] bg-[var(--color-ink)] text-white">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-3 px-4 py-3">
           <Link href="/admin" className="display text-lg text-[var(--color-volt)]">

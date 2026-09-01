@@ -61,20 +61,39 @@ class HttpOtpSender implements OtpSender {
   }
 }
 
+/**
+ * Demo sender: delivers nothing. The code reaches the browser through the
+ * checkout action instead — see src/lib/demo.ts for why this exists and what it
+ * gives up.
+ */
+class DemoOtpSender implements OtpSender {
+  readonly name = "demo";
+
+  async send(phone: string, _code: string): Promise<void> {
+    console.info(`[otp] demo mode — code for ${maskPhone(phone)} shown on screen, no SMS sent`);
+  }
+}
+
 let cached: OtpSender | null = null;
 
 export function getOtpSender(): OtpSender {
   if (cached) return cached;
   const config = env();
 
-  cached =
-    config.OTP_PROVIDER === "http"
-      ? new HttpOtpSender(
-          config.SMS_HTTP_ENDPOINT!,
-          config.SMS_HTTP_API_KEY!,
-          config.SMS_SENDER_ID,
-        )
-      : new ConsoleOtpSender();
+  switch (config.OTP_PROVIDER) {
+    case "http":
+      cached = new HttpOtpSender(
+        config.SMS_HTTP_ENDPOINT!,
+        config.SMS_HTTP_API_KEY!,
+        config.SMS_SENDER_ID,
+      );
+      break;
+    case "demo":
+      cached = new DemoOtpSender();
+      break;
+    default:
+      cached = new ConsoleOtpSender();
+  }
 
   return cached;
 }

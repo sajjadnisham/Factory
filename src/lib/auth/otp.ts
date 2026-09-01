@@ -1,6 +1,7 @@
 import { createHash, randomBytes, randomInt, timingSafeEqual } from "node:crypto";
 
 import { db } from "@/lib/db";
+import { isDemoMode } from "@/lib/demo";
 import { env } from "@/lib/env";
 import { getOtpSender } from "@/lib/otp/sender";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -23,7 +24,13 @@ import { checkRateLimit } from "@/lib/rate-limit";
 export type OtpPurpose = "checkout" | "login";
 
 export type SendOtpResult =
-  | { ok: true; expiresAt: Date; resendAvailableAt: Date }
+  | {
+      ok: true;
+      expiresAt: Date;
+      resendAvailableAt: Date;
+      /** Only ever populated in demo mode — see src/lib/demo.ts. */
+      demoCode?: string;
+    }
   | { ok: false; error: string; retryAfterSeconds?: number };
 
 export type VerifyOtpResult =
@@ -128,6 +135,9 @@ export async function sendOtp(
     resendAvailableAt: new Date(
       Date.now() + config.OTP_RESEND_COOLDOWN_SECONDS * 1000,
     ),
+    // In demo mode no SMS is sent, so the code is handed back for the UI to
+    // display. Every other provider leaves this undefined.
+    ...(isDemoMode() ? { demoCode: code } : {}),
   };
 }
 

@@ -14,6 +14,7 @@ export function LoginForm() {
   const [phoneInput, setPhoneInput] = useState("");
   const [phone, setPhone] = useState<string | null>(null);
   const [code, setCode] = useState("");
+  const [demoCode, setDemoCode] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [cooldown, setCooldown] = useState(0);
@@ -36,6 +37,7 @@ export function LoginForm() {
       return;
     }
     setPhone(result.phone);
+    setDemoCode(result.demoCode ?? null);
     setCooldown(60);
   }
 
@@ -97,6 +99,13 @@ export function LoginForm() {
           <p className="text-sm">
             We sent a code to <strong>+960 {phoneInput}</strong>.
           </p>
+          {demoCode && (
+            <p className="rounded-lg border-2 border-[var(--color-electric)] bg-white p-2.5 text-sm">
+              <span className="font-bold uppercase">Demo store</span> — no SMS was
+              sent. Your code is{" "}
+              <strong className="text-lg tracking-widest">{demoCode}</strong>
+            </p>
+          )}
           <div>
             <label className="field-label" htmlFor="login-code">Verification code</label>
             <input

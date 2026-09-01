@@ -1,4 +1,5 @@
 import { BottomNav } from "@/components/layout/bottom-nav";
+import { DemoBanner } from "@/components/layout/demo-banner";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { getCart } from "@/lib/cart";
@@ -28,6 +29,8 @@ export default async function StorefrontLayout({
       >
         Skip to content
       </a>
+
+      <DemoBanner />
 
       <SiteHeader
         storeName={settings.logoText}

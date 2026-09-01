@@ -19,7 +19,7 @@ const serverSchema = z.object({
   GOOGLE_SERVICE_ACCOUNT_EMAIL: z.string().optional(),
   GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY: z.string().optional(),
 
-  OTP_PROVIDER: z.enum(["console", "http"]).default("console"),
+  OTP_PROVIDER: z.enum(["console", "http", "demo"]).default("console"),
   OTP_LENGTH: z.coerce.number().int().min(4).max(8).default(4),
   OTP_TTL_SECONDS: z.coerce.number().int().min(60).max(1800).default(300),
   OTP_MAX_ATTEMPTS: z.coerce.number().int().min(1).max(10).default(5),
@@ -77,6 +77,19 @@ export function env(): ServerEnv {
   if (value.NODE_ENV === "production" && value.OTP_PROVIDER === "console") {
     throw new Error(
       'OTP_PROVIDER="console" prints codes to the server log and must not be used in production. Configure a real SMS provider.',
+    );
+  }
+  if (value.OTP_PROVIDER === "demo") {
+    // Deliberately allowed in production so the store can be deployed as a
+    // public demo, but it is an authentication bypass: anyone can claim any
+    // phone number. The storefront carries a permanent banner saying so.
+    console.warn(
+      "\n" +
+        "  ┌──────────────────────────────────────────────────────────────┐\n" +
+        "  │  DEMO MODE — verification codes are shown on screen.         │\n" +
+        "  │  Anyone can sign in as any phone number. Never point this     │\n" +
+        "  │  deployment at a real store or real customer data.           │\n" +
+        "  └──────────────────────────────────────────────────────────────┘\n",
     );
   }
 
