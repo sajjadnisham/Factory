@@ -44,7 +44,8 @@ RUN addgroup --system --gid 1001 nodejs \
 # The standalone bundle, plus the assets it does not trace.
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+# No ./public here: this project has no public directory. If one is added, this
+# COPY has to come back or its assets will be missing at runtime.
 
 # The STOCK folder is the product source for the local storage provider, and
 # carries the generated placeholder images.
@@ -56,10 +57,15 @@ COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
 COPY --from=builder --chown=nextjs:nodejs /app/src ./src
 COPY --from=builder --chown=nextjs:nodejs /app/tsconfig.json ./tsconfig.json
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/prisma ./node_modules/prisma
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/tsx ./node_modules/tsx
+
+# The full dependency tree, not a hand-picked subset.
+#
+# The standalone bundle carries only what the *server* traces, which is not
+# enough for the CLIs: the Prisma CLI needs `effect` and the rest of
+# @prisma/config's tree, and tsx needs esbuild. Copying prisma/ and tsx/ alone
+# produced a container where migrations and the seed script both died on a
+# missing module. This costs image size and buys a runtime that actually works.
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
 
 COPY --from=builder --chown=nextjs:nodejs /app/scripts/docker-entrypoint.sh ./docker-entrypoint.sh
 
