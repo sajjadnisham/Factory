@@ -1,12 +1,12 @@
 # Render Blueprint — deploys the storefront and a PostgreSQL database together.
 #
 # Use it from https://dashboard.render.com/select-repo?type=blueprint, pointing
-# at this repository. Render reads this file, provisions both services, wires
-# DATABASE_URL, and runs migrations before each release.
+# at this repository. Render reads this file, provisions both services and
+# wires DATABASE_URL. Migrations run from the container entrypoint on boot.
 #
 # After the first deploy, open a shell on the web service and run:
 #   ADMIN_INITIAL_USERNAME=admin ADMIN_INITIAL_PASSWORD='<long password>' \
-#     npx tsx scripts/admin:create
+#     npx tsx scripts/create-admin.ts
 #   npx tsx scripts/sync-stock.ts
 # — or, to load the demo catalogue and orders:
 #   ALLOW_SEED_IN_PRODUCTION=1 npx tsx scripts/seed.ts
@@ -24,8 +24,8 @@ services:
     dockerfilePath: ./Dockerfile
     plan: free
     healthCheckPath: /
-    # Schema changes are applied before the new version starts serving.
-    preDeployCommand: npx prisma migrate deploy
+    # Migrations run from the container entrypoint rather than a
+    # preDeployCommand, which Render offers on paid plans only.
     envVars:
       - key: DATABASE_URL
         fromDatabase:

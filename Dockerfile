@@ -61,7 +61,10 @@ COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modul
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/tsx ./node_modules/tsx
 
+COPY --from=builder --chown=nextjs:nodejs /app/scripts/docker-entrypoint.sh ./docker-entrypoint.sh
+
 USER nextjs
 EXPOSE 3000
 
-CMD ["node", "server.js"]
+# Applies pending migrations, then starts the server.
+CMD ["./docker-entrypoint.sh"]
