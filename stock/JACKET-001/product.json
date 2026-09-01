@@ -1,0 +1,18 @@
+{
+  "sku": "JACKET-001",
+  "type": "jacket",
+  "name": "Coach Jacket",
+  "price": 1890,
+  "colors": [
+    "Black"
+  ],
+  "sizes": [
+    "M",
+    "L",
+    "XL",
+    "XXL"
+  ],
+  "description": "Snap-front coach jacket with a quilted lining. Wind-resistant shell.",
+  "newArrival": true,
+  "stock": 10
+}

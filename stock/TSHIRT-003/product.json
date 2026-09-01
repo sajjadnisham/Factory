@@ -1,0 +1,21 @@
+{
+  "sku": "TSHIRT-003",
+  "type": "tshirt",
+  "name": "Acid Wash Tee",
+  "price": 890,
+  "currency": "MVR",
+  "colors": [
+    "Washed Black",
+    "Bone"
+  ],
+  "sizes": [
+    "S",
+    "M",
+    "L",
+    "XL",
+    "XXL"
+  ],
+  "description": "Garment-dyed and hand-washed so no two come out the same. Mid-weight, slightly boxy.",
+  "newArrival": true,
+  "stock": 30
+}

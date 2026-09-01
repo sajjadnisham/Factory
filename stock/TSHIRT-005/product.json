@@ -1,0 +1,19 @@
+{
+  "sku": "TSHIRT-005",
+  "type": "tshirt",
+  "name": "Long Sleeve Layer Tee",
+  "price": 950,
+  "colors": [
+    "Black",
+    "Olive"
+  ],
+  "sizes": [
+    "M",
+    "L",
+    "XL",
+    "XXL"
+  ],
+  "description": "Slim long-sleeve cut for layering under a shirt or jacket.",
+  "featured": true,
+  "stock": 18
+}

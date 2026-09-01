@@ -167,6 +167,8 @@ export async function syncStock(
       report.productsRemoved = await deactivateMissingProducts(seenFolderIds);
     }
 
+    await pruneOldSyncRuns();
+
     report.durationMs = Date.now() - startedAt;
     await db.syncRun.update({
       where: { id: run.id },
@@ -407,6 +409,26 @@ async function deactivateMissingProducts(seenFolderIds: string[]): Promise<numbe
     data: { active: false },
   });
   return result.count;
+}
+
+/**
+ * Keeps the sync history bounded. Every run writes a SyncRun and a row per
+ * issue, so an hourly sync would otherwise grow these tables forever. Only the
+ * recent runs are useful — the current one is what the admin acts on.
+ */
+async function pruneOldSyncRuns(keep = 20): Promise<void> {
+  const cutoff = await db.syncRun.findMany({
+    orderBy: { startedAt: "desc" },
+    skip: keep,
+    take: 1,
+    select: { startedAt: true },
+  });
+  if (cutoff.length === 0) return;
+
+  // Issues cascade with their run.
+  await db.syncRun.deleteMany({
+    where: { startedAt: { lt: cutoff[0]!.startedAt } },
+  });
 }
 
 function errorMessage(error: unknown): string {

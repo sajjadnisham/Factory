@@ -1,0 +1,18 @@
+{
+  "sku": "PANTS-003",
+  "type": "pants",
+  "name": "Tech Jogger",
+  "price": 1150,
+  "colors": [
+    "Black",
+    "Charcoal"
+  ],
+  "sizes": [
+    "S",
+    "M",
+    "L",
+    "XL"
+  ],
+  "description": "Water-resistant shell with zip pockets and an elastic cuff.",
+  "stock": 24
+}

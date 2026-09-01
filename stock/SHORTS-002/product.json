@@ -1,0 +1,17 @@
+{
+  "sku": "SHORTS-002",
+  "type": "shorts",
+  "name": "Cargo Short",
+  "price": 890,
+  "colors": [
+    "Sand"
+  ],
+  "sizes": [
+    "30",
+    "32",
+    "34",
+    "36"
+  ],
+  "description": "Six-pocket cargo cut just above the knee.",
+  "stock": 14
+}

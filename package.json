@@ -14,6 +14,7 @@
     "db:seed": "tsx scripts/seed.ts",
     "admin:create": "tsx scripts/create-admin.ts",
     "stock:sync": "tsx scripts/sync-stock.ts",
+    "stock:images": "tsx scripts/generate-images.ts",
     "test:e2e": "tsx scripts/e2e-test.ts"
   },
   "dependencies": {

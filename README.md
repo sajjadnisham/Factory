@@ -116,6 +116,15 @@ If the folder says 12, three sell, and you edit the folder to 20, stock becomes
 - Node.js 20+
 - PostgreSQL 14+
 
+### Demo data
+
+The repository ships a demo catalogue of 18 products across every category —
+tees, pants, shorts, shirts, hoodies, a jacket and accessories — with discounts,
+per-variant stock, a low-stock item and a sold-out item, plus one deliberately
+malformed folder that proves a bad product does not break the rest. Product
+photography is not included; `db:seed` generates placeholder images so the
+storefront is populated on a fresh clone.
+
 ### Setup
 
 ```bash
@@ -132,11 +141,26 @@ ADMIN_INITIAL_USERNAME=admin ADMIN_INITIAL_PASSWORD='a-long-random-password' \
   npm run admin:create
 ```
 
-Then add product folders to `./stock` and sync:
+Then either load the demo data, or add your own product folders:
+
+```bash
+npm run db:seed               # demo catalogue, customers and orders
+npm run dev                   # http://localhost:3000
+```
+
+`db:seed` generates placeholder images, syncs STOCK, and creates eight demo
+customers with a spread of orders across every status. It is safe to re-run: it
+removes the previous demo data (returning its stock) before recreating it, and
+refuses to run against `NODE_ENV=production` unless
+`ALLOW_SEED_IN_PRODUCTION=1` is set.
+
+Demo customers use phone numbers starting `+96090100`, which is how the seed
+recognises its own data. Nothing else is touched.
+
+To work with your own products instead, drop folders into `./stock` and:
 
 ```bash
 npm run stock:sync            # or press SYNC STOCK in /admin
-npm run dev                   # http://localhost:3000
 ```
 
 ### Scripts
@@ -148,6 +172,8 @@ npm run dev                   # http://localhost:3000
 | `npm start` | Production server |
 | `npm run typecheck` | TypeScript, no emit |
 | `npm run stock:sync` | Sync STOCK from the command line |
+| `npm run stock:images` | Regenerate placeholder product images (`-- --force` to overwrite) |
+| `npm run db:seed` | Load the demo catalogue, customers and orders |
 | `npm run admin:create` | Create or reset an admin user |
 | `npm run test:e2e` | End-to-end test of the order and inventory flows |
 

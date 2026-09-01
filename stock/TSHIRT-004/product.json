@@ -1,0 +1,18 @@
+{
+  "sku": "TSHIRT-004",
+  "type": "tshirt",
+  "name": "Heavy Pocket Tee",
+  "price": 790,
+  "colors": [
+    "White",
+    "Sand"
+  ],
+  "sizes": [
+    "S",
+    "M",
+    "L",
+    "XL"
+  ],
+  "description": "240gsm cotton with a reinforced chest pocket. Holds its shape through the wash.",
+  "stock": 22
+}

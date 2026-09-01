@@ -1,0 +1,19 @@
+{
+  "sku": "SHIRT-001",
+  "type": "shirt",
+  "name": "Camp Collar Shirt",
+  "price": 1190,
+  "colors": [
+    "Ecru",
+    "Olive"
+  ],
+  "sizes": [
+    "S",
+    "M",
+    "L",
+    "XL"
+  ],
+  "description": "Open collar, boxy body, rayon-cotton blend that moves in the humidity.",
+  "featured": true,
+  "stock": 16
+}

@@ -1,0 +1,19 @@
+{
+  "sku": "SHORTS-001",
+  "type": "shorts",
+  "name": "Mesh Court Short",
+  "price": 690,
+  "colors": [
+    "Black",
+    "Navy"
+  ],
+  "sizes": [
+    "S",
+    "M",
+    "L",
+    "XL"
+  ],
+  "description": "Breathable mesh with a 7-inch inseam. Built for the heat.",
+  "newArrival": true,
+  "stock": 28
+}

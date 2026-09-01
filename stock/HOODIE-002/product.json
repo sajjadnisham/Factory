@@ -1,0 +1,33 @@
+{
+  "sku": "HOODIE-002",
+  "type": "hoodie",
+  "name": "Zip Through Hoodie",
+  "price": 1690,
+  "comparePrice": 1990,
+  "colors": [
+    "Charcoal"
+  ],
+  "sizes": [
+    "M",
+    "L",
+    "XL"
+  ],
+  "description": "Full-zip with side pockets and a heavy YKK pull.",
+  "variants": [
+    {
+      "size": "M",
+      "color": "Charcoal",
+      "stock": 4
+    },
+    {
+      "size": "L",
+      "color": "Charcoal",
+      "stock": 3
+    },
+    {
+      "size": "XL",
+      "color": "Charcoal",
+      "stock": 2
+    }
+  ]
+}

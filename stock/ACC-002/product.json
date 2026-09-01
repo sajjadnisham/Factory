@@ -1,0 +1,14 @@
+{
+  "sku": "ACC-002",
+  "type": "accessory",
+  "name": "Canvas Tote",
+  "price": 450,
+  "colors": [
+    "Natural"
+  ],
+  "sizes": [
+    "ONE SIZE"
+  ],
+  "description": "16oz canvas tote with a flat base and long handles.",
+  "stock": 0
+}

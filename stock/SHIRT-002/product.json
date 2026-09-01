@@ -1,0 +1,17 @@
+{
+  "sku": "SHIRT-002",
+  "type": "shirt",
+  "name": "Oversized Flannel",
+  "price": 1390,
+  "colors": [
+    "Red Check"
+  ],
+  "sizes": [
+    "M",
+    "L",
+    "XL",
+    "XXL"
+  ],
+  "description": "Brushed cotton flannel cut two sizes up. Wear it open as a layer.",
+  "stock": 12
+}

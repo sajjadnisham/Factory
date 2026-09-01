@@ -1,0 +1,20 @@
+{
+  "sku": "PANTS-002",
+  "type": "pants",
+  "name": "Relaxed Denim",
+  "price": 1450,
+  "comparePrice": 1750,
+  "colors": [
+    "Indigo",
+    "Washed Black"
+  ],
+  "sizes": [
+    "30",
+    "32",
+    "34",
+    "36"
+  ],
+  "description": "Straight leg with a touch of stretch. Sits on the waist, no break at the ankle.",
+  "newArrival": true,
+  "stock": 20
+}

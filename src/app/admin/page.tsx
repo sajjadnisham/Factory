@@ -22,6 +22,11 @@ export default async function AdminDashboard() {
     );
   }
 
+  // Fetched before the rest so the issue count can be scoped to it. Counting
+  // every issue ever recorded would climb with each sync and stop describing
+  // the catalogue as it currently stands.
+  const lastSync = await db.syncRun.findFirst({ orderBy: { startedAt: "desc" } });
+
   const [
     paidTotal,
     orderCount,
@@ -32,7 +37,6 @@ export default async function AdminDashboard() {
     inactiveCount,
     customerCount,
     lowStock,
-    lastSync,
     openIssues,
     recentOrders,
   ] = await Promise.all([
@@ -53,8 +57,9 @@ export default async function AdminDashboard() {
       orderBy: { stock: "asc" },
       take: 8,
     }),
-    db.syncRun.findFirst({ orderBy: { startedAt: "desc" } }),
-    db.productSyncIssue.count({ where: { severity: "error" } }),
+    db.productSyncIssue.count({
+      where: { severity: "error", syncRunId: lastSync?.id ?? "__none__" },
+    }),
     db.order.findMany({
       orderBy: { placedAt: "desc" },
       take: 6,

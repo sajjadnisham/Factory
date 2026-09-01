@@ -1,0 +1,15 @@
+{
+  "sku": "ACC-001",
+  "type": "accessory",
+  "name": "Logo Cap",
+  "price": 390,
+  "colors": [
+    "Black",
+    "Sand"
+  ],
+  "sizes": [
+    "ONE SIZE"
+  ],
+  "description": "Six-panel cotton twill cap with an adjustable strap.",
+  "stock": 40
+}

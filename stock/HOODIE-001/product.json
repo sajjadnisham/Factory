@@ -1,0 +1,21 @@
+{
+  "sku": "HOODIE-001",
+  "type": "hoodie",
+  "name": "Heavyweight Hoodie",
+  "price": 1590,
+  "colors": [
+    "Black",
+    "Grey Marl"
+  ],
+  "sizes": [
+    "S",
+    "M",
+    "L",
+    "XL",
+    "XXL"
+  ],
+  "description": "400gsm loopback cotton with a double-lined hood. The one you keep reaching for.",
+  "featured": true,
+  "newArrival": true,
+  "stock": 20
+}
