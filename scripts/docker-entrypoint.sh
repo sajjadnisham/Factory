@@ -70,7 +70,27 @@ run_step admin 120 node node_modules/tsx/dist/cli.mjs scripts/bootstrap.ts --adm
 run_step seed 600 env ALLOW_SEED_IN_PRODUCTION=1 \
   node node_modules/tsx/dist/cli.mjs scripts/seed.ts
 
+# Next's standalone server binds to whatever $HOSTNAME says, falling back to
+# 0.0.0.0 only when it is unset:
+#
+#     const hostname = process.env.HOSTNAME || '0.0.0.0'
+#
+# Container runtimes set HOSTNAME to the container or pod name, which is the
+# worst possible value here. Where it resolves to a loopback address the server
+# comes up, logs "Ready", answers itself — and refuses every connection from the
+# platform's proxy, which is a 502 on a service the dashboard calls Live. Where
+# it does not resolve at all the server exits(1) on ENOTFOUND and the container
+# restarts forever. Both were reproduced; the first is what took this store down
+# and hid from every local test, because a local test curls loopback.
+#
+# Forcing it here rather than with ENV in the Dockerfile is deliberate: the
+# platform injects its environment over the image's, so an ENV line loses.
+# SERVER_BIND_HOST exists for a deployment that genuinely needs a specific
+# interface.
+HOSTNAME="${SERVER_BIND_HOST:-0.0.0.0}"
+export HOSTNAME
+
 # exec, so the server becomes PID 1 and receives the platform's stop signals
 # directly — no shell in between to forward them.
-echo "[entrypoint] starting server"
+echo "[entrypoint] starting server on ${HOSTNAME}:${PORT:-3000}"
 exec node server.js

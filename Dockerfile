@@ -36,6 +36,11 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
+# The standalone server binds to $HOSTNAME, and container runtimes set that to
+# the container's own name — which binds it somewhere the outside world cannot
+# reach. The entrypoint forces this again at runtime, because a platform's
+# injected environment overrides anything set here.
+ENV HOSTNAME=0.0.0.0
 
 # Run as a non-root user.
 RUN addgroup --system --gid 1001 nodejs \
@@ -72,5 +77,6 @@ COPY --from=builder --chown=nextjs:nodejs /app/scripts/docker-entrypoint.sh ./do
 USER nextjs
 EXPOSE 3000
 
-# Applies pending migrations, then starts the server.
+# Provisions the database when there is anything outstanding, then binds the
+# server to 0.0.0.0 and starts it.
 CMD ["./docker-entrypoint.sh"]
