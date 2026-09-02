@@ -371,19 +371,38 @@ A free instance spins down after about fifteen minutes of inactivity and
 cold-starts on the next visit. Requests during that window can return 502 before
 the container is up — Render's own dashboard warns of "50 seconds or more".
 
-The container is arranged to make that window as short as it can be. The entry
-point starts the web server *first* and applies migrations alongside it, rather
-than before it, so the port binds in well under a second instead of the fifteen
-it took when schema work ran first. The health check points at `/api/health`,
-which touches no database and so answers correctly while that work is still
-finishing.
+The container is arranged to make that window as short as it can be.
 
-Measured against a container layout booting on an empty database: healthy in
-0.5s, storefront serving in 1.6s.
+The entry point starts the web server *first* and does the schema work alongside
+it, rather than before it, so the port binds in well under a second instead of
+the fifteen it took when schema work ran first. The health check points at
+`/api/health`, which touches no database and so answers correctly while that
+work is still finishing.
 
-Ordering only matters on a first deploy, when the schema does not exist yet and
-there is no traffic to serve. Upgrading off the free plan removes the spin-down
-entirely.
+The schema work is then gated on a probe (`scripts/provision-check.mjs`). The
+entry point runs on every wake from sleep, not just on deploys, and both of the
+steps after it — `prisma migrate deploy` and `scripts/bootstrap.ts` — are no-ops
+on all but the first boot. They are not *free* no-ops, though: each is a second
+Node process peaking around 200MB, started inside a 512MB instance while the
+server is trying to answer the request that did the waking. The probe asks
+Postgres what is actually outstanding using the client the server has loaded
+anyway — about 80MB, a fraction of a second — and the entry point skips whatever
+is already done. It fails open: any error at all, an unreachable database
+included, and both steps run as before.
+
+One thing keeps the bootstrap running on every wake: `ADMIN_INITIAL_PASSWORD`
+being set. That variable is how the admin password is rotated on a host with no
+shell, so the probe cannot treat it as already applied. Clearing it once the
+admin user exists — which the deploy checklist asks for anyway — is what makes
+that step free.
+
+Measured on a replay of the container layout, already provisioned: healthy in
+0.5s, storefront serving in 1.6s, with no heavy process started at all.
+
+None of this removes the spin-down itself. A free instance still sleeps, and the
+first visitor still waits for a cold start. The two ways out are an external
+uptime pinger hitting `/api/health` more often than every fifteen minutes, or a
+paid instance type, which does not sleep.
 
 ### Checkout needs an SMS provider — or demo mode
 
