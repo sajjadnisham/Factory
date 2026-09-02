@@ -3,19 +3,25 @@
  *
  * On a free instance the container is stopped when idle and started again on
  * the next visitor, so the entrypoint runs on *every* wake — not just on
- * deploys. `prisma migrate deploy` and the bootstrap script cost a second Node
- * process and roughly 200MB each, all of it alongside a server that is trying
- * to answer the request that woke it, inside a 512MB instance. Both are no-ops
- * on all but the first boot, and paying for them on every wake is the
- * difference between a visitor waiting and a visitor seeing 502.
+ * deploys. Each provisioning step is a Node process of its own, peaking around
+ * 200MB, started alongside a server that is trying to answer the request that
+ * woke it, inside a 512MB instance. Every step is a no-op after the first boot,
+ * and paying for them on every wake is the difference between a visitor waiting
+ * and a visitor seeing 502.
  *
  * This probe answers the question with the client the server already uses, for
  * about 80MB and a fraction of a second: it compares the migrations baked into
- * the image against the ones Postgres says are applied, then checks whether the
- * bootstrap has anything left to do. It prints one line per outstanding job
- * ("migrate", "bootstrap"), and nothing at all when the instance is ready.
+ * the image against the ones Postgres says are applied, then checks the admin
+ * user and the catalogue. It prints one line per outstanding job — "migrate",
+ * "admin", "seed" — and nothing at all when the instance is ready.
  *
- * It fails OPEN: any error at all prints the job anyway, so a probe that cannot
+ * The steps are reported separately because the entrypoint runs them
+ * separately. Nesting them (bootstrap spawning the seed, the seed spawning the
+ * image generator) put five Node processes and 809MB into a 512MB instance,
+ * which the kernel resolved by killing the container mid-seed — leaving the
+ * catalogue empty, so the next boot did it all again.
+ *
+ * It fails OPEN: any error at all reports every step, so a probe that cannot
  * answer degrades to the old behaviour rather than skipping real work.
  */
 import { readdirSync } from "node:fs";
@@ -46,29 +52,25 @@ async function appliedMigrations(prisma) {
 }
 
 /**
- * Is there provisioning left to do?
+ * Is the admin user step outstanding?
  *
- * Deliberately conservative about the admin password: whenever
- * ADMIN_INITIAL_PASSWORD is present the bootstrap runs, because that variable
- * is how the password is rotated on a host with no shell and the probe has no
- * way to tell a rotated password from the current one without re-implementing
- * the hashing. Clearing the variable once the admin exists — which the
- * bootstrap itself asks the operator to do — is what makes this step free.
+ * Deliberately conservative about the password: whenever ADMIN_INITIAL_PASSWORD
+ * is present this reports work to do, because that variable is how the password
+ * is rotated on a host with no shell and the probe has no way to tell a rotated
+ * password from the current one without re-implementing the hashing. Clearing
+ * the variable once the admin exists — which the bootstrap itself asks the
+ * operator to do — is what makes the step free.
  */
-async function bootstrapNeeded(prisma) {
-  if (ADMIN_INITIAL_PASSWORD) {
-    return "ADMIN_INITIAL_PASSWORD is set — applying it";
-  }
-
-  if ((await prisma.adminUser.count()) === 0) {
-    return "no admin user yet";
-  }
-
-  if (SEED_DEMO_DATA === "1" && (await prisma.product.count()) === 0) {
-    return "SEED_DEMO_DATA is 1 and the catalogue is empty";
-  }
-
+async function adminNeeded(prisma) {
+  if (ADMIN_INITIAL_PASSWORD) return "ADMIN_INITIAL_PASSWORD is set — applying it";
+  if ((await prisma.adminUser.count()) === 0) return "no admin user yet";
   return null;
+}
+
+async function seedNeeded(prisma) {
+  if (SEED_DEMO_DATA !== "1") return null;
+  if ((await prisma.product.count()) > 0) return null;
+  return "SEED_DEMO_DATA is 1 and the catalogue is empty";
 }
 
 async function main() {
@@ -76,8 +78,7 @@ async function main() {
   if (baked.length === 0) {
     // No migrations in the image is a packaging fault, not an up-to-date
     // database. Say so and let the CLI produce the real error.
-    console.log("migrate");
-    console.log("bootstrap");
+    everything();
     return;
   }
 
@@ -89,24 +90,38 @@ async function main() {
 
     if (pending.length > 0) {
       console.error(`[probe] ${pending.length} migration(s) pending: ${pending.join(", ")}`);
-      console.log("migrate");
-      // The tables the bootstrap check reads may not exist yet.
-      console.log("bootstrap");
+      // The tables the other checks read may not exist yet, so nothing can be
+      // ruled out: report every step.
+      everything();
       return;
     }
 
     console.error(`[probe] schema is current (${baked.length} migrations applied)`);
 
-    const reason = await bootstrapNeeded(prisma);
-    if (reason) {
-      console.error(`[probe] bootstrap needed: ${reason}`);
-      console.log("bootstrap");
-    } else {
+    const admin = await adminNeeded(prisma);
+    const seed = await seedNeeded(prisma);
+
+    if (admin) {
+      console.error(`[probe] admin step needed: ${admin}`);
+      console.log("admin");
+    }
+    if (seed) {
+      console.error(`[probe] seed step needed: ${seed}`);
+      console.log("seed");
+    }
+    if (!admin && !seed) {
       console.error("[probe] already provisioned");
     }
   } finally {
     await prisma.$disconnect();
   }
+}
+
+/** Every step, for the paths where nothing can be ruled out. */
+function everything() {
+  console.log("migrate");
+  console.log("admin");
+  console.log("seed");
 }
 
 main().catch((error) => {
@@ -116,6 +131,5 @@ main().catch((error) => {
     "[probe] could not determine schema state:",
     error instanceof Error ? error.message : error,
   );
-  console.log("migrate");
-  console.log("bootstrap");
+  everything();
 });

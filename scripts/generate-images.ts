@@ -114,9 +114,16 @@ async function firstColourOf(folder: string): Promise<string | undefined> {
   }
 }
 
-async function main() {
-  const force = process.argv.includes("--force");
-
+/**
+ * Writes any placeholder images the manifest calls for that are not on disk.
+ *
+ * Exported so callers can run it in-process. The seed script used to spawn this
+ * file as a child, which cost a whole extra Node process — affordable on a
+ * laptop, not inside a 512MB container that is also running the web server.
+ */
+export async function generatePlaceholderImages(
+  { force = false }: { force?: boolean } = {},
+): Promise<{ written: number; skipped: number }> {
   let manifest: Record<string, number>;
   try {
     manifest = JSON.parse(await fs.readFile(MANIFEST, "utf8")) as Record<string, number>;
@@ -158,9 +165,14 @@ async function main() {
   if (skipped > 0 && !force) {
     console.log("Pass --force to regenerate the existing ones.");
   }
+
+  return { written, skipped };
 }
 
-main().catch((error) => {
-  console.error(error instanceof Error ? error.message : error);
-  process.exitCode = 1;
-});
+// CLI entry point: npm run stock:images [-- --force]
+if (process.argv[1] && path.resolve(process.argv[1]).endsWith("generate-images.ts")) {
+  generatePlaceholderImages({ force: process.argv.includes("--force") }).catch((error) => {
+    console.error(error instanceof Error ? error.message : error);
+    process.exitCode = 1;
+  });
+}

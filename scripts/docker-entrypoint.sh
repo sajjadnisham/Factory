@@ -1,70 +1,76 @@
 #!/bin/sh
 # Container entrypoint.
 #
-# The server is started FIRST, before migrations and provisioning, so the port
-# binds in about two seconds instead of fifteen. That matters on a free plan:
-# the instance spins down when idle and cold-starts on the next visit, and every
-# second spent before binding is a second of 502s for whoever is waiting.
+# Shaped entirely by the free tier it has to survive: 512MB of memory, and an
+# instance that is stopped when idle and started again on the next visitor — so
+# everything here runs on every wake, not just on deploys.
 #
-# The health check points at /api/health, which touches no database, so the
-# platform sees a healthy service immediately while the schema work finishes
-# alongside it. Ordering only matters on a first deploy against an empty
-# database, when there is no traffic to serve yet.
+# Provisioning happens BEFORE the server starts, one step at a time, and only
+# when the probe says a step is outstanding.
 #
-# Everything after the server starts is guarded by a cheap probe. This script
-# runs on every wake from spin-down, not just on deploys, and the schema work is
-# a no-op on all but the first boot — but a no-op that still costs a second Node
-# process and a spawned schema engine inside a 512MB instance, competing with
-# the request that did the waking.
+# That ordering is the opposite of the obvious one, and it is deliberate. Each
+# step is a Node process of its own: migrations peak at 225MB, the seed at
+# 275MB. The server is another 225MB. Run them alongside it and a first boot
+# needs more memory than the instance has — measured at 809MB when the steps
+# also nested, and still 500MB after they were flattened. The kernel resolves
+# that by killing the container mid-seed, which leaves the catalogue empty, so
+# the next boot seeds again: a loop that never ends and serves nothing but 502.
+# Run them before the server and each gets the whole instance to itself.
+#
+# The cost is that a first boot binds the port late. It is paid exactly once:
+# after the database is provisioned the probe reports nothing, no step runs, and
+# the port binds in well under a second — which is what matters for a free
+# instance waking from sleep with someone waiting on it.
+#
+# Every step is bounded, so a hung one cannot stop the server from ever
+# starting. Nothing here is allowed to be fatal: a store that comes up with a
+# provisioning problem is worth far more than no store at all, and the logs say
+# what happened.
 set -e
 
+# busybox and coreutils agree on `timeout SECONDS COMMAND`; older busybox wants
+# -t. If neither works, run unbounded rather than not at all.
+if timeout 1 true 2>/dev/null; then
+  bounded() { secs="$1"; shift; timeout "$secs" "$@"; }
+elif timeout -t 1 true 2>/dev/null; then
+  bounded() { secs="$1"; shift; timeout -t "$secs" "$@"; }
+else
+  bounded() { shift; "$@"; }
+fi
+
+# Asks Postgres what is actually outstanding, using the client the server would
+# load anyway: about 80MB and a fraction of a second. Prints one line per
+# outstanding job, nothing when the instance is already provisioned, and every
+# job on any error at all — so a probe that cannot answer falls back to doing
+# the work rather than skipping it.
+PENDING="$(bounded 60 node scripts/provision-check.mjs || printf 'migrate\nadmin\nseed\n')"
+
+run_step() {
+  name="$1"
+  limit="$2"
+  shift 2
+  case "$PENDING" in
+    *"$name"*)
+      echo "[entrypoint] $name…"
+      bounded "$limit" "$@" \
+        || echo "[entrypoint] WARNING: $name failed or timed out — see above" >&2
+      ;;
+    *)
+      echo "[entrypoint] $name not needed — skipping"
+      ;;
+  esac
+}
+
+run_step migrate 300 node node_modules/prisma/build/index.js migrate deploy
+run_step admin 120 node node_modules/tsx/dist/cli.mjs scripts/bootstrap.ts --admin
+
+# ALLOW_SEED_IN_PRODUCTION is the seed script's own guard against being pointed
+# at a real store. The probe only asks for this step when SEED_DEMO_DATA=1 and
+# the catalogue is empty, so the guard is being answered, not bypassed.
+run_step seed 600 env ALLOW_SEED_IN_PRODUCTION=1 \
+  node node_modules/tsx/dist/cli.mjs scripts/seed.ts
+
+# exec, so the server becomes PID 1 and receives the platform's stop signals
+# directly — no shell in between to forward them.
 echo "[entrypoint] starting server"
-node server.js &
-SERVER_PID=$!
-
-# Hand shutdown signals to the server so deploys and spin-downs are clean.
-trap 'kill -TERM "$SERVER_PID" 2>/dev/null' TERM INT
-
-# Asks Postgres what is actually outstanding, using the same client the server
-# has loaded anyway. Prints "migrate" and/or "bootstrap" when there is work to
-# do, nothing when the instance is already provisioned, and both on any error at
-# all — so a probe that cannot answer falls back to the old always-run
-# behaviour. It costs about 80MB and a fraction of a second; the two steps it
-# guards cost roughly 200MB each.
-PENDING="$(node scripts/provision-check.mjs || printf 'migrate\nbootstrap\n')"
-
-case "$PENDING" in
-  *migrate*)
-    echo "[entrypoint] applying database migrations…"
-    if node node_modules/prisma/build/index.js migrate deploy; then
-      echo "[entrypoint] migrations up to date"
-    else
-      # Failing hard would take down a server that is already serving. The logs
-      # say what went wrong; the store keeps answering.
-      echo "[entrypoint] WARNING: migrations failed — check DATABASE_URL" >&2
-    fi
-    ;;
-  *)
-    echo "[entrypoint] schema already current — skipping migrations"
-    ;;
-esac
-
-# Creates the admin user and, when asked, loads the demo catalogue. Both skip
-# themselves once done — but only after paying for tsx, esbuild and a second
-# Prisma client, so the probe decides whether to start it at all. Note that it
-# still runs on every boot while ADMIN_INITIAL_PASSWORD is set, since that is
-# how the password is rotated on a host with no shell; clearing the variable
-# once the admin exists is what makes this step free.
-case "$PENDING" in
-  *bootstrap*)
-    echo "[entrypoint] running bootstrap…"
-    node node_modules/tsx/dist/cli.mjs scripts/bootstrap.ts || \
-      echo "[entrypoint] WARNING: bootstrap failed" >&2
-    ;;
-  *)
-    echo "[entrypoint] already provisioned — skipping bootstrap"
-    ;;
-esac
-
-echo "[entrypoint] ready"
-wait "$SERVER_PID"
+exec node server.js

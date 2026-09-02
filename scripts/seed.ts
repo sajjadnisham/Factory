@@ -14,9 +14,6 @@
  *
  * Usage: npm run db:seed
  */
-import { spawnSync } from "node:child_process";
-import path from "node:path";
-
 import { hashPassword } from "../src/lib/auth/password";
 import { db } from "../src/lib/db";
 import {
@@ -26,6 +23,7 @@ import {
   updateOrderStatus,
 } from "../src/lib/orders/service";
 import { formatSyncReport, syncStock } from "../src/lib/products/sync";
+import { generatePlaceholderImages } from "./generate-images";
 
 /**
  * Demo customers live in a reserved number range so re-seeding can remove the
@@ -133,14 +131,16 @@ async function main() {
 
   // --- 1. images -----------------------------------------------------------
   console.log("\n1. Placeholder images");
-  const images = spawnSync(
-    process.execPath,
-    [path.join(process.cwd(), "node_modules/tsx/dist/cli.mjs"), "scripts/generate-images.ts"],
-    { encoding: "utf8" },
-  );
-  console.log("  " + (images.stdout ?? "").trim().split("\n").join("\n  "));
-  if (images.status !== 0) {
-    console.warn("  ! image generation failed; products may render without pictures");
+  // In-process rather than a spawned child: this runs on a container's first
+  // boot, alongside the web server, inside 512MB.
+  try {
+    const images = await generatePlaceholderImages();
+    console.log(`  ${images.written} written, ${images.skipped} already present.`);
+  } catch (error) {
+    console.warn(
+      "  ! image generation failed; products may render without pictures:",
+      error instanceof Error ? error.message : error,
+    );
   }
 
   // --- 2. catalogue --------------------------------------------------------

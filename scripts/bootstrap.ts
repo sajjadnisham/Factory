@@ -12,7 +12,14 @@
  *     empty, so a free instance waking from sleep does not re-seed itself and
  *     wipe the demo orders every time.
  *
- * Usage: npm run bootstrap  (or automatically, from docker-entrypoint.sh)
+ * Steps can be selected with --admin and --seed; with neither, both run. The
+ * container entrypoint names the step it wants and runs the seed as its own
+ * top-level process, because nesting them cost more memory than a 512MB
+ * instance has: server + bootstrap + seed + image generation, all at once, was
+ * measured at 809MB and the kernel killed the container mid-seed. The kill left
+ * the catalogue empty, so the next boot seeded again — a loop that never ended.
+ *
+ * Usage: npm run bootstrap [-- --admin | --seed]
  */
 import { spawnSync } from "node:child_process";
 import path from "node:path";
@@ -81,8 +88,14 @@ async function ensureCatalogue(): Promise<void> {
 }
 
 async function main() {
-  await ensureAdmin();
-  await ensureCatalogue();
+  const wantsAdmin = process.argv.includes("--admin");
+  const wantsSeed = process.argv.includes("--seed");
+  // Neither flag means "do everything", which is what a developer running
+  // `npm run bootstrap` by hand expects.
+  const all = !wantsAdmin && !wantsSeed;
+
+  if (all || wantsAdmin) await ensureAdmin();
+  if (all || wantsSeed) await ensureCatalogue();
 }
 
 main()
