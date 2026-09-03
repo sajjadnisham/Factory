@@ -72,7 +72,9 @@ export default async function HomePage() {
                     href={`/shop/${category.slug}`}
                     className="comic-card flex items-center justify-between p-3"
                   >
-                    <span className="display text-sm">{category.name}</span>
+                    <span className="text-sm font-semibold uppercase tracking-wide">
+                      {category.name}
+                    </span>
                     <span className="text-xs text-[var(--color-steel)]">
                       {category.count}
                     </span>
@@ -93,8 +95,9 @@ export default async function HomePage() {
       <section className="mx-4 my-6 border-[2.5px] border-[var(--color-ink)] bg-[var(--color-volt)] p-5 shadow-[6px_6px_0_var(--color-ink)]">
         <h2 className="section-title">{settings.storeName}</h2>
         <p className="mt-2 text-sm font-medium">{settings.brandMessage}</p>
-        <p className="mt-3 text-xs font-bold uppercase">
-          {settings.deliveryEstimate} · Delivery to {settings.deliveryAreas.join(", ")}
+        <p className="mt-3 text-xs font-bold uppercase">{settings.deliveryHeadline}</p>
+        <p className="mt-1 text-xs font-semibold">
+          {settings.deliveryAreas.join(" • ")}
         </p>
       </section>
     </div>
@@ -127,7 +130,8 @@ function ProductRail({
           <ProductCard
             key={product.id}
             product={product}
-            priority={priority && i < 3}
+            priority={priority && i < 2}
+            sizes="(max-width: 639px) 84vw, (max-width: 1023px) 46vw, 30vw"
           />
         ))}
       </div>

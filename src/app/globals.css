@@ -137,6 +137,33 @@
     cursor: not-allowed;
   }
 
+  /*
+   * Category names are set in the body face rather than the display face.
+   * Archivo Black at these sizes reads as a wall of ink once several category
+   * names sit next to each other; the body face at 600 keeps them legible
+   * without competing with the section headings above them.
+   */
+  .btn-chip {
+    font-family: var(--font-body);
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+
+  /*
+   * Horizontally scrolling rows of chips. Mobile browsers draw a grey scrollbar
+   * under an overflow-x row, which reads as a stray rule under the categories
+   * rather than as a control — the row is obviously swipeable without it.
+   */
+  .chip-row {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .chip-row::-webkit-scrollbar { display: none; }
+
   .btn-primary { background: var(--color-volt); color: var(--color-ink); }
   .btn-dark { background: var(--color-ink); color: var(--color-white); }
   .btn-electric { background: var(--color-electric); color: var(--color-white); }
@@ -175,18 +202,19 @@
 
   /* --- Product grid ----------------------------------------------------- */
   /*
-   * Three products per row on mobile is a hard requirement from the brief.
-   * The gap shrinks below 360px so cards stay usable at 320px rather than
-   * dropping to two columns.
+   * Two products per row on mobile, at the store owner's request. The brief
+   * originally specified three; two was chosen after seeing it on a phone,
+   * because the cards now carry only a price and a size run and read better
+   * large. Tablet and desktop counts are unchanged.
    */
   .product-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.5rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.625rem;
   }
 
   @media (max-width: 359px) {
-    .product-grid { gap: 0.375rem; }
+    .product-grid { gap: 0.5rem; }
   }
 
   @media (min-width: 768px) {
@@ -200,11 +228,19 @@
     .product-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
   }
 
-  /* Horizontal swipe rails on the homepage. */
+  /*
+   * Horizontal swipe rails on the homepage.
+   *
+   * The card width is a variable because it is the one number that decides how
+   * big a rail card feels: 84% is twice the previous 42%, which is four times
+   * the area, and it leaves a sliver of the next card showing so the rail still
+   * reads as scrollable. Change --rail-card alone to retune it.
+   */
   .rail {
+    --rail-card: 84%;
     display: grid;
     grid-auto-flow: column;
-    grid-auto-columns: 42%;
+    grid-auto-columns: var(--rail-card);
     gap: 0.625rem;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
@@ -215,8 +251,8 @@
   .rail::-webkit-scrollbar { display: none; }
   .rail > * { scroll-snap-align: start; }
 
-  @media (min-width: 640px) { .rail { grid-auto-columns: 30%; } }
-  @media (min-width: 1024px) { .rail { grid-auto-columns: 20%; } }
+  @media (min-width: 640px) { .rail { --rail-card: 46%; } }
+  @media (min-width: 1024px) { .rail { --rail-card: 30%; } }
 
   /* --- Section heading -------------------------------------------------- */
   .section-title {

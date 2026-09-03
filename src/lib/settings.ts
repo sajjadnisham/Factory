@@ -20,6 +20,8 @@ export interface StoreSettings {
   freeDeliveryThresholdMinor: number;
   deliveryAreas: string[];
   deliveryEstimate: string;
+  /** Delivery headline on the homepage brand block. */
+  deliveryHeadline: string;
 
   // Payment methods offered at checkout.
   paymentMethods: { id: string; label: string; description: string; enabled: boolean }[];
@@ -41,14 +43,15 @@ export interface StoreSettings {
 }
 
 export const DEFAULT_SETTINGS: StoreSettings = {
-  storeName: "STOCK & CO",
+  storeName: "Factory",
   tagline: "Men's streetwear, Maldives",
-  logoText: "STOCK&CO",
+  logoText: "FACTORY",
 
   deliveryFeeMinor: 5000, // MVR 50
   freeDeliveryThresholdMinor: 100_000, // MVR 1,000
-  deliveryAreas: ["Malé", "Hulhumalé", "Villimalé", "Airport / Hulhulé"],
+  deliveryAreas: ["Malé", "Hulhumalé", "Vilimalé", "Airport / Hulhulé"],
   deliveryEstimate: "1–2 days within Greater Malé",
+  deliveryHeadline: "Free delivery within Greater Malé area",
 
   paymentMethods: [
     {
@@ -77,7 +80,7 @@ export const DEFAULT_SETTINGS: StoreSettings = {
   heroCtaLabel: "SHOP NOW",
   promoMessage: "Free delivery in Malé over MVR 1,000",
   brandMessage:
-    "Every drop is cut, checked and packed in Malé. Small batches, honest prices, no restock hype.",
+    "Everyday style, made simple. Quality pieces, fair prices, and fresh drops without the hype.",
 };
 
 export async function getSettings(): Promise<StoreSettings> {

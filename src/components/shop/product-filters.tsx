@@ -62,7 +62,7 @@ export function ProductFilters({ options, basePath }: Props) {
 
   return (
     <div className="mb-3">
-      <div className="flex gap-2 overflow-x-auto pb-1">
+      <div className="chip-row">
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
@@ -78,7 +78,7 @@ export function ProductFilters({ options, basePath }: Props) {
             type="button"
             onClick={() => apply((next) => next.set("sort", sort.value))}
             aria-pressed={activeSort === sort.value}
-            className={`btn shrink-0 px-3 text-xs ${
+            className={`btn btn-chip shrink-0 px-3 text-xs ${
               activeSort === sort.value ? "btn-dark" : "btn-ghost"
             }`}
           >

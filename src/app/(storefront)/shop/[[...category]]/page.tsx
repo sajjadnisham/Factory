@@ -77,10 +77,10 @@ export default async function ShopPage({
         {result.total} product{result.total === 1 ? "" : "s"}
       </p>
 
-      <div className="mb-3 flex gap-2 overflow-x-auto pb-1">
+      <div className="chip-row mb-3">
         <Link
           href="/shop"
-          className={`btn shrink-0 px-3 text-xs ${!slug ? "btn-dark" : "btn-ghost"}`}
+          className={`btn btn-chip shrink-0 px-3 text-xs ${!slug ? "btn-dark" : "btn-ghost"}`}
         >
           All
         </Link>
@@ -88,7 +88,9 @@ export default async function ShopPage({
           <Link
             key={c.slug}
             href={`/shop/${c.slug}`}
-            className={`btn shrink-0 px-3 text-xs ${slug === c.slug ? "btn-dark" : "btn-ghost"}`}
+            className={`btn btn-chip shrink-0 px-3 text-xs ${
+              slug === c.slug ? "btn-dark" : "btn-ghost"
+            }`}
           >
             {c.name}
           </Link>

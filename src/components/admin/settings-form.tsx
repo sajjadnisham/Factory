@@ -22,6 +22,7 @@ export function SettingsForm({ settings }: { settings: StoreSettings }) {
     freeDeliveryThreshold: String(toMajor(settings.freeDeliveryThresholdMinor)),
     deliveryAreas: settings.deliveryAreas.join(", "),
     deliveryEstimate: settings.deliveryEstimate,
+    deliveryHeadline: settings.deliveryHeadline,
     contactPhone: settings.contactPhone,
     contactEmail: settings.contactEmail,
     whatsapp: settings.whatsapp,
@@ -54,6 +55,7 @@ export function SettingsForm({ settings }: { settings: StoreSettings }) {
           .map((a) => a.trim())
           .filter(Boolean),
         deliveryEstimate: form.deliveryEstimate,
+        deliveryHeadline: form.deliveryHeadline,
         contactPhone: form.contactPhone,
         contactEmail: form.contactEmail,
         whatsapp: form.whatsapp,
@@ -117,6 +119,7 @@ export function SettingsForm({ settings }: { settings: StoreSettings }) {
           onChange={(v) => set("deliveryAreas", v)}
         />
         <Field label="Delivery estimate" value={form.deliveryEstimate} onChange={(v) => set("deliveryEstimate", v)} />
+        <Field label="Delivery headline (homepage)" value={form.deliveryHeadline} onChange={(v) => set("deliveryHeadline", v)} />
       </Group>
 
       <Group title="Contact">
