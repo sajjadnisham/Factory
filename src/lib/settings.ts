@@ -47,8 +47,14 @@ export const DEFAULT_SETTINGS: StoreSettings = {
   tagline: "Men's streetwear, Maldives",
   logoText: "FACTORY",
 
-  deliveryFeeMinor: 5000, // MVR 50
-  freeDeliveryThresholdMinor: 100_000, // MVR 1,000
+  // Delivery is free inside the areas listed below, which is what the homepage
+  // and the promo bar both say. A zero fee is what makes that true at checkout
+  // rather than only in the copy; the threshold is zero because there is
+  // nothing to reach — with a zero fee, "free over MVR X" would be nonsense,
+  // and the storefront hides every such line while the threshold is zero.
+  // To charge again, set both in Admin → Settings; no deploy is needed.
+  deliveryFeeMinor: 0,
+  freeDeliveryThresholdMinor: 0,
   deliveryAreas: ["Malé", "Hulhumalé", "Vilimalé", "Airport / Hulhulé"],
   deliveryEstimate: "1–2 days within Greater Malé",
   deliveryHeadline: "Free delivery within Greater Malé area",
@@ -78,7 +84,7 @@ export const DEFAULT_SETTINGS: StoreSettings = {
   heroHeadline: "BUILT FOR THE STREET",
   heroSubline: "Oversized fits, heavyweight cotton, no filler.",
   heroCtaLabel: "SHOP NOW",
-  promoMessage: "Free delivery in Malé over MVR 1,000",
+  promoMessage: "Free delivery within Greater Malé area",
   brandMessage:
     "Everyday style, made simple. Quality pieces, fair prices, and fresh drops without the hype.",
 };

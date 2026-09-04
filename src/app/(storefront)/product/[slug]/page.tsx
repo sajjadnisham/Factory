@@ -123,9 +123,11 @@ export default async function ProductPage({
             <p className="font-bold uppercase">Delivery</p>
             <p className="mt-1 text-[var(--color-graphite)]">
               {settings.deliveryEstimate}.{" "}
-              {settings.freeDeliveryThresholdMinor > 0 && (
+              {settings.deliveryFeeMinor === 0 ? (
+                <>Free delivery.</>
+              ) : settings.freeDeliveryThresholdMinor > 0 ? (
                 <>Free over {formatMvr(settings.freeDeliveryThresholdMinor)}.</>
-              )}
+              ) : null}
             </p>
           </section>
         </div>
