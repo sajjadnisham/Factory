@@ -1,6 +1,7 @@
 import { env } from "@/lib/env";
 
 import { GoogleDriveStorageProvider } from "./google-drive-provider";
+import { DbStorageProvider } from "./db-provider";
 import { LocalStorageProvider } from "./local-provider";
 import type { StorageProvider } from "./types";
 
@@ -23,6 +24,9 @@ export function getStorageProvider(): StorageProvider {
         serviceAccountEmail: config.GOOGLE_SERVICE_ACCOUNT_EMAIL!,
         privateKey: config.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY!,
       });
+      break;
+    case "database":
+      cached = new DbStorageProvider();
       break;
     case "local":
     default:

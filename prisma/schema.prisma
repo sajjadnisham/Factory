@@ -22,11 +22,11 @@ datasource db {
 // ---------------------------------------------------------------------------
 
 model Category {
-  id       String    @id @default(cuid())
-  slug     String    @unique
-  name     String
-  sortOrder Int      @default(0)
-  products Product[]
+  id        String    @id @default(cuid())
+  slug      String    @unique
+  name      String
+  sortOrder Int       @default(0)
+  products  Product[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -38,27 +38,27 @@ model Product {
   // --- synced from STOCK ---
   // Folder id in the storage provider. Stable across renames on Drive, which is
   // how a renamed folder is detected as a rename rather than delete + create.
-  externalFolderId String  @unique
+  externalFolderId   String  @unique
   externalFolderName String
-  sku              String  @unique
-  name             String
-  slug             String  @unique
-  type             String
-  description      String  @default("")
-  active           Boolean @default(true)
-  featured         Boolean @default(false)
-  newArrival       Boolean @default(false)
+  sku                String  @unique
+  name               String
+  slug               String  @unique
+  type               String
+  description        String  @default("")
+  active             Boolean @default(true)
+  featured           Boolean @default(false)
+  newArrival         Boolean @default(false)
   // Cheapest and dearest variant price, denormalised from the variants at sync
   // time. The storefront shows the minimum, and sorting or filtering by it in
   // SQL is only possible with the value on the product row — sorting a page of
   // results in JavaScript would only order that page, not the whole catalogue.
-  minPriceMinor    Int     @default(0)
-  maxPriceMinor    Int     @default(0)
+  minPriceMinor      Int     @default(0)
+  maxPriceMinor      Int     @default(0)
 
   // Raw parsed metadata, kept for admin debugging of parse results.
-  sourceMetadata   Json?
+  sourceMetadata Json?
   // Hash of parsed metadata + image list; lets sync skip untouched products.
-  contentHash      String?
+  contentHash    String?
 
   categoryId String?
   category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
@@ -81,11 +81,11 @@ model ProductVariant {
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   // --- synced from STOCK ---
-  size  String
-  color String
+  size              String
+  color             String
   // Price in laari (MVR * 100) to keep money in integers.
-  priceMinor         Int
-  comparePriceMinor  Int?
+  priceMinor        Int
+  comparePriceMinor Int?
 
   // --- transactional, owned by the database ---
   stock             Int @default(0)
@@ -95,9 +95,9 @@ model ProductVariant {
   /// against this, so restocking in the folder never erases units already sold.
   syncedStock       Int @default(0)
 
-  orderItems             OrderItem[]
-  cartItems              CartItem[]
-  inventoryTransactions  InventoryTransaction[]
+  orderItems            OrderItem[]
+  cartItems             CartItem[]
+  inventoryTransactions InventoryTransaction[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -145,16 +145,16 @@ model ProductSyncIssue {
 }
 
 model SyncRun {
-  id        String   @id @default(cuid())
-  startedAt DateTime @default(now())
+  id         String    @id @default(cuid())
+  startedAt  DateTime  @default(now())
   finishedAt DateTime?
-  status    String   @default("running") // running | success | failed
+  status     String    @default("running") // running | success | failed
 
-  productsFound  Int @default(0)
-  productsNew    Int @default(0)
+  productsFound   Int @default(0)
+  productsNew     Int @default(0)
   productsUpdated Int @default(0)
   productsRemoved Int @default(0)
-  imagesUpdated  Int @default(0)
+  imagesUpdated   Int @default(0)
   invalidProducts Int @default(0)
 
   errorMessage String?
@@ -170,19 +170,19 @@ model SyncRun {
 // ---------------------------------------------------------------------------
 
 model InventoryTransaction {
-  id        String @id @default(cuid())
+  id        String         @id @default(cuid())
   variantId String
   variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
 
   // sync_set | reserve | release | fulfil | restock | manual_adjust
-  kind      String
-  quantity  Int
+  kind       String
+  quantity   Int
   // Snapshot of the resulting on-hand stock, for auditability.
   stockAfter Int
-  orderId   String?
-  order     Order?  @relation(fields: [orderId], references: [id], onDelete: SetNull)
-  note      String?
-  createdAt DateTime @default(now())
+  orderId    String?
+  order      Order?   @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  note       String?
+  createdAt  DateTime @default(now())
 
   @@index([variantId, createdAt])
   @@index([orderId])
@@ -196,10 +196,10 @@ model Customer {
   id String @id @default(cuid())
 
   // E.164, the account identity. There are no passwords — phone + OTP only.
-  phone     String  @unique
-  name      String
-  email     String?
-  active    Boolean @default(true)
+  phone  String  @unique
+  name   String
+  email  String?
+  active Boolean @default(true)
 
   addresses Address[]
   orders    Order[]
@@ -215,14 +215,14 @@ model Address {
   customerId String
   customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
 
-  label        String  @default("Home")
+  label         String  @default("Home")
   recipientName String
-  phone        String
-  addressLine  String
-  area         String
-  island       String  @default("")
-  instructions String?
-  isDefault    Boolean @default(false)
+  phone         String
+  addressLine   String
+  area          String
+  island        String  @default("")
+  instructions  String?
+  isDefault     Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -233,16 +233,16 @@ model Address {
 /// A pending phone verification. The code itself is never stored — only a
 /// salted SHA-256 hash — and the row is deleted once consumed.
 model OtpChallenge {
-  id        String   @id @default(cuid())
-  phone     String
-  codeHash  String
-  purpose   String   @default("checkout") // checkout | login
-  attempts  Int      @default(0)
-  expiresAt DateTime
-  consumedAt DateTime?
+  id            String    @id @default(cuid())
+  phone         String
+  codeHash      String
+  purpose       String    @default("checkout") // checkout | login
+  attempts      Int       @default(0)
+  expiresAt     DateTime
+  consumedAt    DateTime?
   // Set once verification succeeds; the checkout endpoint requires it.
-  verifiedToken String? @unique
-  createdAt DateTime @default(now())
+  verifiedToken String?   @unique
+  createdAt     DateTime  @default(now())
 
   @@index([phone, createdAt])
   @@index([expiresAt])
@@ -250,26 +250,26 @@ model OtpChallenge {
 
 /// Generic fixed-window rate limiter, also used for OTP send throttling.
 model RateLimit {
-  id        String   @id @default(cuid())
-  key       String   @unique
-  count     Int      @default(0)
+  id          String   @id @default(cuid())
+  key         String   @unique
+  count       Int      @default(0)
   windowStart DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt   DateTime @updatedAt
 
   @@index([windowStart])
 }
 
 model Session {
-  id         String   @id @default(cuid())
+  id         String     @id @default(cuid())
   // SHA-256 of the cookie token; the raw token only ever lives in the cookie.
-  tokenHash  String   @unique
+  tokenHash  String     @unique
   customerId String?
-  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  customer   Customer?  @relation(fields: [customerId], references: [id], onDelete: Cascade)
   adminId    String?
   admin      AdminUser? @relation(fields: [adminId], references: [id], onDelete: Cascade)
   expiresAt  DateTime
-  createdAt  DateTime @default(now())
-  lastSeenAt DateTime @default(now())
+  createdAt  DateTime   @default(now())
+  lastSeenAt DateTime   @default(now())
 
   @@index([customerId])
   @@index([adminId])
@@ -299,7 +299,7 @@ model Cart {
 
   // Anonymous carts are keyed by a cookie token until the customer verifies a
   // phone number, at which point customerId is filled in.
-  token      String  @unique
+  token      String    @unique
   customerId String?
   customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
 
@@ -318,7 +318,7 @@ model CartItem {
 
   variantId String
   variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
-  quantity  Int @default(1)
+  quantity  Int            @default(1)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -343,12 +343,12 @@ model Order {
   shipPhone         String
   shipAddressLine   String
   shipArea          String
-  shipIsland        String @default("")
+  shipIsland        String  @default("")
   shipInstructions  String?
 
   subtotalMinor    Int
   deliveryFeeMinor Int
-  discountMinor    Int @default(0)
+  discountMinor    Int    @default(0)
   totalMinor       Int
   currency         String @default("MVR")
 
@@ -357,16 +357,16 @@ model Order {
   // unpaid | pending | paid | failed | refunded
   paymentStatus String @default("unpaid")
 
-  items    OrderItem[]
-  payments Payment[]
-  events   OrderEvent[]
+  items                 OrderItem[]
+  payments              Payment[]
+  events                OrderEvent[]
   inventoryTransactions InventoryTransaction[]
 
-  placedAt  DateTime  @default(now())
-  paidAt    DateTime?
+  placedAt    DateTime  @default(now())
+  paidAt      DateTime?
   cancelledAt DateTime?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   @@index([customerId, placedAt])
   @@index([status])
@@ -382,13 +382,13 @@ model OrderItem {
   variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
 
   // Product details snapshotted at order time.
-  sku         String
-  productName String
-  size        String
-  color       String
-  imageUrl    String?
+  sku            String
+  productName    String
+  size           String
+  color          String
+  imageUrl       String?
   unitPriceMinor Int
-  quantity    Int
+  quantity       Int
   lineTotalMinor Int
 
   @@index([orderId])
@@ -399,16 +399,16 @@ model Payment {
   orderId String
   order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
-  provider      String // manual | gateway name
-  method        String // bank_transfer | cash_on_delivery | card | wallet
-  amountMinor   Int
-  currency      String @default("MVR")
+  provider        String // manual | gateway name
+  method          String // bank_transfer | cash_on_delivery | card | wallet
+  amountMinor     Int
+  currency        String  @default("MVR")
   // initiated | pending | succeeded | failed | refunded
-  status        String @default("initiated")
-  providerRef   String?
+  status          String  @default("initiated")
+  providerRef     String?
   // Provider response, minus anything sensitive.
   providerPayload Json?
-  failureReason String?
+  failureReason   String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -441,4 +441,48 @@ model StoreSetting {
   key       String   @id
   value     Json
   updatedAt DateTime @updatedAt
+}
+
+/// A product folder uploaded through the admin, rather than read from a disk
+/// or a Drive account.
+///
+/// These two models are the storage backing for STORAGE_PROVIDER="database".
+/// They mirror what a STOCK folder holds — a name, some files, a product.json —
+/// so DbStorageProvider can present them through exactly the same interface as
+/// the filesystem and Drive providers, and the parser and sync service cannot
+/// tell the difference.
+///
+/// They exist because a free container has no persistent disk: anything written
+/// to ./stock is lost on the next deploy or wake from sleep. Postgres is the
+/// only writable, durable place such an instance has.
+model StockFolder {
+  id         String      @id @default(cuid())
+  /// The folder name, unique like a directory name would be.
+  name       String      @unique
+  createdAt  DateTime    @default(now())
+  modifiedAt DateTime    @updatedAt
+  files      StockFile[]
+
+  @@index([name])
+}
+
+/// One file inside an uploaded product folder: an image, or the product.json.
+model StockFile {
+  id       String      @id @default(cuid())
+  folderId String
+  folder   StockFolder @relation(fields: [folderId], references: [id], onDelete: Cascade)
+
+  name     String
+  mimeType String
+  size     Int
+  /// Content hash. The sync service treats this as an opaque change token, so
+  /// re-uploading an identical image does not churn the catalogue.
+  checksum String
+  bytes    Bytes
+
+  createdAt  DateTime @default(now())
+  modifiedAt DateTime @updatedAt
+
+  @@unique([folderId, name])
+  @@index([folderId])
 }

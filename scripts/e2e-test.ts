@@ -13,6 +13,7 @@ import path from "node:path";
 import { consumeVerifiedToken, sendOtp, verifyOtp } from "../src/lib/auth/otp";
 import { queryProducts } from "../src/lib/catalog";
 import { setStorageProvider } from "../src/lib/storage";
+import { DbStorageProvider } from "../src/lib/storage/db-provider";
 import { LocalStorageProvider } from "../src/lib/storage/local-provider";
 import { db } from "../src/lib/db";
 import {
@@ -22,6 +23,11 @@ import {
   updateOrderStatus,
 } from "../src/lib/orders/service";
 import { syncStock } from "../src/lib/products/sync";
+import {
+  deleteUploadedProduct,
+  listUploadedProducts,
+  saveUploadedProduct,
+} from "../src/lib/products/upload";
 
 let passed = 0;
 let failed = 0;
@@ -591,6 +597,121 @@ async function main() {
       "the new number is past the five-digit boundary",
       rollover.ok && Number(rollover.orderNumber) > 99999,
     );
+  }
+
+
+  // -------------------------------------------------------------------------
+  section("14. Admin uploads travel the same path as a STOCK folder");
+  {
+    // The whole point of the database provider is that nothing downstream can
+    // tell an uploaded product from a Drive one. These assertions are about
+    // that indistinguishability, not about the upload form.
+    const png = await fs.readFile("stock/TSHIRT-001/01.png");
+    const previousProvider = new LocalStorageProvider("./stock");
+
+    try {
+      setStorageProvider(new DbStorageProvider());
+      await deleteUploadedProduct("E2E-UPLOAD-001");
+      await deleteUploadedProduct("E2E-UPLOAD-002");
+
+      const saved = await saveUploadedProduct({
+        folderName: "E2E-UPLOAD-001",
+        productJson: {
+          sku: "E2E-UPLOAD-001",
+          type: "tshirt",
+          name: "E2E Upload Tee",
+          price: 555,
+          sizes: ["S", "M", "L"],
+          stock: 9,
+        },
+        images: [
+          { fileName: "a.png", mimeType: "image/png", bytes: png },
+          { fileName: "b.png", mimeType: "image/png", bytes: png },
+        ],
+      });
+      check("upload saves", saved.ok, saved.ok ? "" : JSON.stringify(saved));
+
+      const provider = new DbStorageProvider();
+      const folder = (await provider.listProductFolders()).find(
+        (f) => f.name === "E2E-UPLOAD-001",
+      );
+      const files = folder ? await provider.listFiles(folder.id) : [];
+      check(
+        "photos are renamed into display order",
+        files.map((f) => f.name).join(",") === "01.png,02.png,product.json",
+        files.map((f) => f.name).join(","),
+      );
+
+      const imageFile = files.find((f) => f.name === "01.png");
+      const roundTripped = imageFile ? await provider.readFile(imageFile.id) : Buffer.alloc(0);
+      check("image bytes survive the round trip exactly", Buffer.compare(roundTripped, png) === 0);
+
+      const report = await syncStock({ triggeredBy: "e2e" });
+      check("sync accepts the uploaded folder", report.invalidProducts === 0);
+
+      const product = await db.product.findUnique({
+        where: { sku: "E2E-UPLOAD-001" },
+        include: { variants: true, images: true },
+      });
+      check("it reaches the catalogue", product !== null);
+      check("price is stored in laari", product?.minPriceMinor === 55_500, String(product?.minPriceMinor));
+      check("each size became a variant", product?.variants.length === 3, String(product?.variants.length));
+      check("stock is spread across them", product?.variants.reduce((s, v) => s + v.stock, 0) === 9);
+      check("both photos are linked", product?.images.length === 2, String(product?.images.length));
+
+      // Re-uploading is a replace. A merge would leave the third photo of a
+      // previous upload attached to a product that no longer has one.
+      await saveUploadedProduct({
+        folderName: "E2E-UPLOAD-001",
+        productJson: {
+          sku: "E2E-UPLOAD-001", type: "tshirt", name: "E2E Renamed Tee",
+          price: 600, sizes: ["S"], stock: 4,
+        },
+        images: [{ fileName: "c.png", mimeType: "image/png", bytes: png }],
+      });
+      await syncStock({ triggeredBy: "e2e" });
+      const replaced = await db.product.findUnique({
+        where: { sku: "E2E-UPLOAD-001" },
+        include: { images: true },
+      });
+      check("re-upload renames the product", replaced?.name === "E2E Renamed Tee", replaced?.name);
+      check("re-upload leaves no stale photo behind", replaced?.images.length === 1,
+        String(replaced?.images.length));
+
+      const listed = await listUploadedProducts();
+      check(
+        "the admin listing reports a size for it",
+        (listed.find((p) => p.name === "E2E-UPLOAD-001")?.totalBytes ?? 0) > png.byteLength,
+      );
+
+      // Removing one folder of several deactivates only that product. Removing
+      // the last one hits the empty-scan guard instead, which is section 12's
+      // subject — so a second folder keeps this case honest.
+      await saveUploadedProduct({
+        folderName: "E2E-UPLOAD-002",
+        productJson: {
+          sku: "E2E-UPLOAD-002", type: "tshirt", name: "E2E Keeper Tee",
+          price: 400, sizes: ["M"], stock: 2,
+        },
+        images: [{ fileName: "d.png", mimeType: "image/png", bytes: png }],
+      });
+      await syncStock({ triggeredBy: "e2e" });
+
+      await deleteUploadedProduct("E2E-UPLOAD-001");
+      await syncStock({ triggeredBy: "e2e" });
+      const removed = await db.product.findUnique({ where: { sku: "E2E-UPLOAD-001" } });
+      const kept = await db.product.findUnique({ where: { sku: "E2E-UPLOAD-002" } });
+      check("removing a folder keeps the product row", removed !== null);
+      check("removing a folder deactivates the product", removed?.active === false);
+      check("the other uploaded product stays active", kept?.active === true);
+    } finally {
+      // Leave the suite as it found it: the real STOCK folder, no fixtures.
+      await deleteUploadedProduct("E2E-UPLOAD-001");
+      await deleteUploadedProduct("E2E-UPLOAD-002");
+      await db.product.deleteMany({ where: { sku: { startsWith: "E2E-UPLOAD-" } } });
+      setStorageProvider(previousProvider);
+      await syncStock({ triggeredBy: "e2e" });
+    }
   }
 
   // -------------------------------------------------------------------------

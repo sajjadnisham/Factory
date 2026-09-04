@@ -14,6 +14,11 @@ import {
 import { db } from "@/lib/db";
 import { markOrderPaid, releaseOrderStock, updateOrderStatus } from "@/lib/orders/service";
 import { syncStock, type SyncReport } from "@/lib/products/sync";
+import {
+  deleteUploadedProduct,
+  saveUploadedProduct,
+  type UploadImage,
+} from "@/lib/products/upload";
 import { checkRateLimit, resetRateLimit } from "@/lib/rate-limit";
 import { updateSettings, type StoreSettings } from "@/lib/settings";
 
@@ -274,4 +279,126 @@ export async function toggleProductActiveAction(
   revalidatePath("/admin/products");
   revalidatePath("/", "layout");
   return { ok: true };
+}
+
+
+// ---------------------------------------------------------------------------
+// Product uploads
+// ---------------------------------------------------------------------------
+
+/**
+ * Fields the upload form collects. Kept deliberately close to the product.json
+ * contract: this action assembles that file and stores it, and the parser is
+ * still the thing that decides whether the result is a valid product.
+ */
+const uploadSchema = z.object({
+  sku: z.string().trim().min(2).max(64),
+  type: z.string().trim().min(1),
+  name: z.string().trim().min(1).max(120),
+  price: z.coerce.number().min(0),
+  comparePrice: z.coerce.number().min(0).optional(),
+  description: z.string().trim().max(4000).optional(),
+  colors: z.string().trim().optional(),
+  sizes: z.string().trim().optional(),
+  stock: z.coerce.number().int().min(0).optional(),
+  featured: z.coerce.boolean().optional(),
+  newArrival: z.coerce.boolean().optional(),
+});
+
+function splitList(value: string | undefined): string[] | undefined {
+  if (!value) return undefined;
+  const items = value.split(",").map((v) => v.trim()).filter(Boolean);
+  return items.length > 0 ? items : undefined;
+}
+
+export async function uploadProductAction(
+  formData: FormData,
+): Promise<AdminResult<{ report: SyncReport; folderName: string }>> {
+  const auth = await requireAdminOrFail();
+  if (!auth.ok) return auth;
+
+  const parsed = uploadSchema.safeParse({
+    sku: formData.get("sku"),
+    type: formData.get("type"),
+    name: formData.get("name"),
+    price: formData.get("price"),
+    comparePrice: formData.get("comparePrice") || undefined,
+    description: formData.get("description") || undefined,
+    colors: formData.get("colors") || undefined,
+    sizes: formData.get("sizes") || undefined,
+    stock: formData.get("stock") || undefined,
+    featured: formData.get("featured") === "on" || undefined,
+    newArrival: formData.get("newArrival") === "on" || undefined,
+  });
+
+  if (!parsed.success) {
+    const first = parsed.error.issues[0];
+    return {
+      ok: false,
+      error: first ? `${first.path.join(".")}: ${first.message}` : "Check the form and try again.",
+    };
+  }
+
+  const images: UploadImage[] = [];
+  for (const entry of formData.getAll("images")) {
+    if (!(entry instanceof File) || entry.size === 0) continue;
+    images.push({
+      fileName: entry.name,
+      mimeType: entry.type,
+      bytes: Buffer.from(await entry.arrayBuffer()),
+    });
+  }
+
+  const input = parsed.data;
+  const saved = await saveUploadedProduct({
+    folderName: input.sku,
+    productJson: {
+      sku: input.sku,
+      type: input.type,
+      name: input.name,
+      price: input.price,
+      ...(input.comparePrice ? { comparePrice: input.comparePrice } : {}),
+      ...(input.description ? { description: input.description } : {}),
+      ...(splitList(input.colors) ? { colors: splitList(input.colors) } : {}),
+      ...(splitList(input.sizes) ? { sizes: splitList(input.sizes) } : {}),
+      ...(input.stock !== undefined ? { stock: input.stock } : {}),
+      featured: input.featured ?? false,
+      newArrival: input.newArrival ?? true,
+    },
+    images,
+  });
+
+  if (!saved.ok) {
+    return { ok: false, error: saved.errors.map((e) => e.message).join(" ") };
+  }
+
+  // Sync immediately, so the admin sees the product live — or sees exactly what
+  // the parser rejected about it — instead of having to press SYNC STOCK and
+  // guess whether the upload or the metadata was at fault.
+  const report = await syncStock({ triggeredBy: auth.username });
+
+  revalidatePath("/admin/products");
+  revalidatePath("/shop");
+  revalidatePath("/");
+
+  return { ok: true, report, folderName: saved.folderName };
+}
+
+export async function deleteUploadedProductAction(
+  folderName: string,
+): Promise<AdminResult<{ report: SyncReport }>> {
+  const auth = await requireAdminOrFail();
+  if (!auth.ok) return auth;
+
+  const removed = await deleteUploadedProduct(folderName);
+  if (!removed) return { ok: false, error: `No uploaded product named "${folderName}".` };
+
+  // Deactivates the product it fed; order history is untouched.
+  const report = await syncStock({ triggeredBy: auth.username });
+
+  revalidatePath("/admin/products");
+  revalidatePath("/shop");
+  revalidatePath("/");
+
+  return { ok: true, report };
 }

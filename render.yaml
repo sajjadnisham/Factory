@@ -34,6 +34,16 @@ services:
         generateValue: true
       - key: APP_URL
         sync: false        # set to the service URL once Render assigns it
+      # Starts on "local" so a first deploy comes up with the demo catalogue
+      # baked into the image — SEED_DEMO_DATA below syncs from it, and there is
+      # nothing else to sync from on a brand new instance.
+      #
+      # Switch to "database" in the dashboard to manage the catalogue through
+      # Admin → Add product, which is the only option that needs no external
+      # account and survives a container with no persistent disk. The demo
+      # products stay until the first real upload, at which point sync sees a
+      # non-empty source and deactivates them. "google-drive" is the third
+      # option; see the README.
       - key: STORAGE_PROVIDER
         value: local
       - key: LOCAL_STOCK_PATH

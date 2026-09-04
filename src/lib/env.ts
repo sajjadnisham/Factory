@@ -19,7 +19,9 @@ const serverSchema = z.object({
     .string()
     .min(32, "SESSION_SECRET must be at least 32 characters"),
 
-  STORAGE_PROVIDER: z.enum(["local", "google-drive"]).default("local"),
+  // "database" stores uploaded products in Postgres, which is the only durable
+  // place a container with no persistent disk has. See db-provider.ts.
+  STORAGE_PROVIDER: z.enum(["local", "google-drive", "database"]).default("local"),
   LOCAL_STOCK_PATH: z.string().default("./stock"),
   GOOGLE_DRIVE_STOCK_FOLDER_ID: z.string().optional(),
   GOOGLE_SERVICE_ACCOUNT_EMAIL: z.string().optional(),

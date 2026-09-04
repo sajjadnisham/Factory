@@ -43,6 +43,11 @@ export default async function AdminProductsPage({
 
   return (
     <div>
+      <div className="mb-4 flex flex-wrap gap-2">
+        <Link href="/admin/products/upload" className="btn btn-primary text-sm">
+          Add a product
+        </Link>
+      </div>
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <h1 className="section-title">Products</h1>
         <div className="ml-auto flex gap-2">
