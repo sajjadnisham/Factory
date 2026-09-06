@@ -11,7 +11,7 @@ export function DemoBanner() {
   return (
     <div
       role="note"
-      className="border-b-[2.5px] border-[var(--color-ink)] bg-[var(--color-electric)] px-3 py-1.5 text-center text-[11px] font-bold uppercase tracking-wide text-chalk"
+      className="border-b-[2.5px] border-[var(--color-ink)] bg-[var(--color-electric-deep)] px-3 py-1.5 text-center text-[11px] font-bold uppercase tracking-wide text-chalk"
     >
       Demo store · verification codes are shown on screen · not a real shop, do
       not enter real details

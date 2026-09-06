@@ -175,7 +175,10 @@
   }
 
   .sticker-new { background: color-mix(in srgb, var(--color-volt) 88%, transparent); color: var(--color-slab); }
-  .sticker-sale { background: var(--color-electric); color: var(--color-chalk); }
+  /* electric-deep, not electric: white on #3d7bff is 3.84:1, and 9px type needs
+     4.5:1. The lighter blue is for accents drawn *on* the dark ground — links,
+     focus rings — where it is the foreground rather than the surface. */
+  .sticker-sale { background: var(--color-electric-deep); color: var(--color-chalk); }
   .sticker-out { background: var(--color-graphite); color: var(--color-slab); }
   .sticker-low { background: color-mix(in srgb, var(--color-white) 70%, transparent); color: var(--color-ink); }
 
@@ -236,7 +239,7 @@
 
   .btn-primary { background: var(--color-volt); color: var(--color-slab); }
   .btn-dark { background: var(--color-slab); color: var(--color-on-slab); }
-  .btn-electric { background: var(--color-electric); color: var(--color-chalk); }
+  .btn-electric { background: var(--color-electric-deep); color: var(--color-chalk); }
   .btn-ghost {
     background: color-mix(in srgb, var(--color-white) 60%, transparent);
     color: var(--color-ink);

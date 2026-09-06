@@ -88,7 +88,7 @@ export function SiteHeader({ storeName, categories, cartCount, promoMessage }: P
           >
             <span aria-hidden>🛒</span>
             {cartCount > 0 && (
-              <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-[var(--color-ink)] bg-[var(--color-electric)] px-1 text-[10px] font-bold text-chalk">
+              <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-[var(--color-ink)] bg-[var(--color-electric-deep)] px-1 text-[10px] font-bold text-chalk">
                 {cartCount > 99 ? "99+" : cartCount}
               </span>
             )}
