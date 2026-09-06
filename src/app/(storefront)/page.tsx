@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { FactoryBadge } from "@/components/brand/factory-badge";
 import { ProductCard } from "@/components/product/product-card";
 import {
   getCategories,
@@ -50,6 +51,15 @@ export default async function HomePage() {
             className="eclipse left-1/2 top-[34%] h-[118vw] w-[118vw] -translate-x-1/2 -translate-y-1/2 sm:h-[58vw] sm:w-[58vw]"
             aria-hidden
           />
+
+          {/* The badge sits in the hole the ring already leaves. That space is
+              circular and near-black by construction, which is exactly what a
+              stamped roundel wants behind it — no scrim, no plate, and the ring
+              reads as a halo around the mark rather than as decoration beside
+              it. Sized and offset to match the ring's centre, not the frame's. */}
+          <div className="pointer-events-none absolute left-1/2 top-[34%] w-[38vw] max-w-[9.5rem] -translate-x-1/2 -translate-y-1/2 sm:w-[16vw]">
+            <FactoryBadge className="h-auto w-full" />
+          </div>
 
           {/* The ring is lifted into the upper two-thirds and this scrim seals
               the bottom, so the headline lands on near-black instead of

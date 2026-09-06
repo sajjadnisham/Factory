@@ -556,6 +556,24 @@ inside a 140-tall box.
 
 It appears in the header and the footer, and both are links to `/`.
 
+### The roundel
+
+`src/components/brand/factory-badge.tsx` is the stamped garment-label badge, in
+the hole the hero's eclipse already leaves. That space is circular and
+near-black by construction, so the mark needs no plate behind it and the ring
+reads as a halo around it.
+
+Two things about arcs, both learned by getting them wrong:
+
+* `textPath` renders only the glyphs that fit on its path and **silently drops
+  the rest**. The first arch was ~285 units for a word needing more, and
+  FACTORY rendered as ACTOR — a letter gone from each end, with no error
+  anywhere. The arch is now 303 units for 245 units of type, and there is a
+  check in the screenshot pass that compares `getComputedTextLength()` against
+  `getTotalLength()`.
+* The lower arc sweeps the opposite way to the upper one. Drawn in the same
+  direction, its text hangs upside down.
+
 ## Where products come from
 
 The catalogue has one source, chosen by `STORAGE_PROVIDER`. Every provider is
