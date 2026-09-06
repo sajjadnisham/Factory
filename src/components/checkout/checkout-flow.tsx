@@ -173,10 +173,10 @@ export function CheckoutFlow({
             key={s}
             className={`flex-1 rounded border-2 border-[var(--color-ink)] px-1.5 py-1 text-center ${
               step === s
-                ? "bg-[var(--color-volt)]"
+                ? "bg-[var(--color-volt)] text-[var(--color-slab)]"
                 : stepIndex(step) > i
-                  ? "bg-[var(--color-ink)] text-white"
-                  : "bg-white text-[var(--color-steel)]"
+                  ? "bg-[var(--color-slab)] text-[var(--color-on-slab)]"
+                  : "bg-[var(--color-white)] text-[var(--color-steel)]"
             }`}
           >
             {["You", "Verify", "Address", "Pay"][i]}
@@ -185,7 +185,7 @@ export function CheckoutFlow({
       </ol>
 
       {error && (
-        <p role="alert" className="rounded-lg border-2 border-[var(--color-danger)] bg-white p-3 text-sm">
+        <p role="alert" className="rounded-lg border-2 border-[var(--color-danger)] bg-[var(--color-white)] p-3 text-sm">
           {error}
         </p>
       )}
@@ -251,7 +251,7 @@ export function CheckoutFlow({
           </p>
 
           {demoCode && (
-            <p className="rounded-lg border-2 border-[var(--color-electric)] bg-white p-2.5 text-sm">
+            <p className="rounded-lg border-2 border-[var(--color-electric)] bg-[var(--color-white)] p-2.5 text-sm">
               <span className="font-bold uppercase">Demo store</span> — no SMS was
               sent. Your code is{" "}
               <strong className="text-lg tracking-widest">{demoCode}</strong>
@@ -412,7 +412,9 @@ export function CheckoutFlow({
               <label
                 key={method.id}
                 className={`flex cursor-pointer gap-2.5 rounded-lg border-2 border-[var(--color-ink)] p-3 ${
-                  paymentMethod === method.id ? "bg-[var(--color-volt)]" : "bg-white"
+                  paymentMethod === method.id
+                    ? "bg-[var(--color-volt)] text-[var(--color-slab)]"
+                    : "bg-[var(--color-white)]"
                 }`}
               >
                 <input

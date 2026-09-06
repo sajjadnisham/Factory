@@ -76,7 +76,7 @@ export function ProductCard({
         )}
 
         {!product.inStock && (
-          <span className="absolute inset-0 bg-white/55" aria-hidden />
+          <span className="absolute inset-0 bg-[color-mix(in_srgb,var(--color-paper)_68%,transparent)]" aria-hidden />
         )}
       </div>
 

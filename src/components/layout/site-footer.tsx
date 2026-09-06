@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { FactoryLogo } from "@/components/brand/factory-logo";
+
 import type { StoreSettings } from "@/lib/settings";
 
 interface Props {
@@ -9,9 +11,11 @@ interface Props {
 
 export function SiteFooter({ settings, categories }: Props) {
   return (
-    <footer className="border-t-[2.5px] border-[var(--color-ink)] bg-[var(--color-ink)] text-[var(--color-paper)]">
+    <footer className="border-t-[2.5px] border-[var(--color-ink)] bg-[var(--color-slab)] text-[var(--color-on-slab)]">
       <div className="mx-auto max-w-6xl px-4 py-8">
-        <p className="display text-2xl text-[var(--color-volt)]">{settings.logoText}</p>
+        <Link href="/" aria-label={`${settings.storeName} — home`} className="inline-block">
+          <FactoryLogo title="" className="h-14 w-auto" />
+        </Link>
         <p className="mt-2 max-w-md text-sm text-[var(--color-mist)]">
           {settings.brandMessage}
         </p>
@@ -63,7 +67,7 @@ export function SiteFooter({ settings, categories }: Props) {
           </div>
         </div>
 
-        <p className="mt-8 border-t border-[var(--color-graphite)] pt-4 text-xs text-[var(--color-steel)]">
+        <p className="mt-8 border-t border-[var(--color-line)] pt-4 text-xs text-[var(--color-steel)]">
           © {new Date().getFullYear()} {settings.storeName}. Prices in MVR.
         </p>
       </div>

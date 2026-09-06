@@ -49,7 +49,7 @@ export default async function AdminCustomersPage() {
                   .filter((o) => o.paymentStatus === "paid")
                   .reduce((sum, o) => sum + o.totalMinor, 0);
                 return (
-                  <tr key={customer.id} className="border-b border-[var(--color-mist)]">
+                  <tr key={customer.id} className="border-b border-[var(--color-line)]">
                     <td className="py-2 pr-3 font-bold">{customer.name}</td>
                     <td className="py-2 pr-3">{formatPhone(customer.phone)}</td>
                     <td className="py-2 pr-3">{customer.orders.length}</td>

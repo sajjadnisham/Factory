@@ -46,7 +46,7 @@ export default async function OrderPage({
   return (
     <div className="mx-auto max-w-2xl px-3 py-4">
       {placed === "1" && (
-        <div className="comic-card mb-4 border-[var(--color-success)] bg-[var(--color-volt)] p-4">
+        <div className="comic-card mb-4 border-[var(--color-success)] bg-[var(--color-volt)] p-4 text-[var(--color-slab)]">
           <p className="display text-xl">Order confirmed</p>
           <p className="mt-1 text-sm">
             Thanks {order.shipRecipientName.split(" ")[0]} — we have your order and

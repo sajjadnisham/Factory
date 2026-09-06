@@ -130,7 +130,7 @@ export default async function AdminProductsPage({
                 const stock = product.variants.reduce((s, v) => s + v.stock, 0);
                 const price = product.variants[0]?.priceMinor ?? 0;
                 return (
-                  <tr key={product.id} className="border-b border-[var(--color-mist)]">
+                  <tr key={product.id} className="border-b border-[var(--color-line)]">
                     <td className="py-2 pr-3">
                       <span className="font-bold">{product.name}</span>
                       <span className="block text-xs text-[var(--color-steel)]">

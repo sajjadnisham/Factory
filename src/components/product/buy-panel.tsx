@@ -129,7 +129,7 @@ export function BuyPanel({ product }: { product: CatalogProduct }) {
       )}
 
       {message && (
-        <p role="alert" className="rounded-lg border-2 border-[var(--color-danger)] bg-white p-2.5 text-sm">
+        <p role="alert" className="rounded-lg border-2 border-[var(--color-danger)] bg-[var(--color-white)] p-2.5 text-sm">
           {message}
         </p>
       )}

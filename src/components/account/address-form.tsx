@@ -54,12 +54,12 @@ export function AddressForm({ deliveryAreas, initial, fallbackName }: Props) {
   return (
     <div className="comic-card grid gap-3 p-4">
       {error && (
-        <p role="alert" className="rounded border-2 border-[var(--color-danger)] bg-white p-2.5 text-sm">
+        <p role="alert" className="rounded border-2 border-[var(--color-danger)] bg-[var(--color-white)] p-2.5 text-sm">
           {error}
         </p>
       )}
       {message && (
-        <p role="status" className="rounded border-2 border-[var(--color-success)] bg-white p-2.5 text-sm">
+        <p role="status" className="rounded border-2 border-[var(--color-success)] bg-[var(--color-white)] p-2.5 text-sm">
           {message}
         </p>
       )}

@@ -76,7 +76,7 @@ export default async function AdminOrdersPage({
             </thead>
             <tbody>
               {orders.map((order) => (
-                <tr key={order.id} className="border-b border-[var(--color-mist)]">
+                <tr key={order.id} className="border-b border-[var(--color-line)]">
                   <td className="py-2 pr-3">
                     <Link
                       href={`/admin/orders/${order.id}`}

@@ -61,7 +61,7 @@ export function LoginForm() {
   return (
     <div className="comic-card grid gap-3 p-4">
       {error && (
-        <p role="alert" className="rounded border-2 border-[var(--color-danger)] bg-white p-2.5 text-sm">
+        <p role="alert" className="rounded border-2 border-[var(--color-danger)] bg-[var(--color-white)] p-2.5 text-sm">
           {error}
         </p>
       )}
@@ -100,7 +100,7 @@ export function LoginForm() {
             We sent a code to <strong>+960 {phoneInput}</strong>.
           </p>
           {demoCode && (
-            <p className="rounded-lg border-2 border-[var(--color-electric)] bg-white p-2.5 text-sm">
+            <p className="rounded-lg border-2 border-[var(--color-electric)] bg-[var(--color-white)] p-2.5 text-sm">
               <span className="font-bold uppercase">Demo store</span> — no SMS was
               sent. Your code is{" "}
               <strong className="text-lg tracking-widest">{demoCode}</strong>

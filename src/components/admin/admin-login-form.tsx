@@ -17,7 +17,7 @@ export function AdminLoginForm() {
   return (
     <form action={formAction} className="comic-card grid gap-3 p-4">
       {state.error && (
-        <p role="alert" className="rounded border-2 border-[var(--color-danger)] bg-white p-2.5 text-sm">
+        <p role="alert" className="rounded border-2 border-[var(--color-danger)] bg-[var(--color-white)] p-2.5 text-sm">
           {state.error}
         </p>
       )}

@@ -43,7 +43,7 @@ export default async function AdminLayout({
   return (
     <div className="min-h-dvh bg-[var(--color-paper)]">
       <DemoBanner />
-      <header className="border-b-[2.5px] border-[var(--color-ink)] bg-[var(--color-ink)] text-white">
+      <header className="border-b-[2.5px] border-[var(--color-ink)] bg-[var(--color-slab)] text-[var(--color-on-slab)]">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-3 px-4 py-3">
           <Link href="/admin" className="display text-lg text-[var(--color-volt)]">
             Admin

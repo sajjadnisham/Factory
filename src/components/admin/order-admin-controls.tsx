@@ -51,7 +51,7 @@ export function OrderAdminControls({
   return (
     <div className="grid gap-4">
       {error && (
-        <p role="alert" className="rounded border-2 border-[var(--color-danger)] bg-white p-2.5 text-sm">
+        <p role="alert" className="rounded border-2 border-[var(--color-danger)] bg-[var(--color-white)] p-2.5 text-sm">
           {error}
         </p>
       )}

@@ -36,7 +36,7 @@ export function CartLines({ lines }: { lines: CartLine[] }) {
   return (
     <div className="grid gap-2.5">
       {error && (
-        <p role="alert" className="rounded-lg border-2 border-[var(--color-danger)] bg-white p-2.5 text-sm">
+        <p role="alert" className="rounded-lg border-2 border-[var(--color-danger)] bg-[var(--color-white)] p-2.5 text-sm">
           {error}
         </p>
       )}
@@ -79,7 +79,7 @@ export function CartLines({ lines }: { lines: CartLine[] }) {
                   onClick={() => changeQuantity(line.variantId, line.quantity - 1)}
                   disabled={pending}
                   aria-label={`Decrease quantity of ${line.productName}`}
-                  className="flex h-9 w-9 items-center justify-center rounded border-2 border-[var(--color-ink)] bg-white text-lg leading-none"
+                  className="flex h-9 w-9 items-center justify-center rounded border-2 border-[var(--color-ink)] bg-[var(--color-white)] text-lg leading-none"
                 >
                   −
                 </button>
@@ -91,7 +91,7 @@ export function CartLines({ lines }: { lines: CartLine[] }) {
                   onClick={() => changeQuantity(line.variantId, line.quantity + 1)}
                   disabled={pending || line.quantity >= line.availableStock}
                   aria-label={`Increase quantity of ${line.productName}`}
-                  className="flex h-9 w-9 items-center justify-center rounded border-2 border-[var(--color-ink)] bg-white text-lg leading-none disabled:opacity-40"
+                  className="flex h-9 w-9 items-center justify-center rounded border-2 border-[var(--color-ink)] bg-[var(--color-white)] text-lg leading-none disabled:opacity-40"
                 >
                   +
                 </button>

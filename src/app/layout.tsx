@@ -52,7 +52,11 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
-  themeColor: "#0a0a0a",
+  themeColor: "#0b0b0f",
+  // Tells the browser the page is dark, so form controls, scrollbars and the
+  // address bar are rendered to match rather than as light widgets on a dark
+  // page.
+  colorScheme: "dark",
 };
 
 export default function RootLayout({
@@ -62,7 +66,20 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${display.variable} ${body.variable}`}>
-      <body className="min-h-dvh">{children}</body>
+      <body className="min-h-dvh">
+        {/*
+          One fixed layer behind every page — storefront and admin alike —
+          rather than a per-page background. Mounting it in the root layout
+          means it is painted once and never re-created on navigation, so the
+          drift carries across route changes instead of restarting.
+        */}
+        <div className="fluid" aria-hidden="true">
+          <span className="f1" />
+          <span className="f2" />
+          <span className="f3" />
+        </div>
+        {children}
+      </body>
     </html>
   );
 }

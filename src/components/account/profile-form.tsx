@@ -21,12 +21,12 @@ export function ProfileForm({
   return (
     <div className="comic-card grid gap-3 p-4">
       {error && (
-        <p role="alert" className="rounded border-2 border-[var(--color-danger)] bg-white p-2.5 text-sm">
+        <p role="alert" className="rounded border-2 border-[var(--color-danger)] bg-[var(--color-white)] p-2.5 text-sm">
           {error}
         </p>
       )}
       {message && (
-        <p role="status" className="rounded border-2 border-[var(--color-success)] bg-white p-2.5 text-sm">
+        <p role="status" className="rounded border-2 border-[var(--color-success)] bg-[var(--color-white)] p-2.5 text-sm">
           {message}
         </p>
       )}
@@ -44,7 +44,7 @@ export function ProfileForm({
 
       <div>
         <span className="field-label">Phone number</span>
-        <p className="rounded-lg border-2 border-[var(--color-mist)] bg-[var(--color-paper)] px-3 py-2.5 text-sm">
+        <p className="rounded-lg border-2 border-[var(--color-line)] bg-[var(--color-paper)] px-3 py-2.5 text-sm">
           {phoneDisplay}
         </p>
         <p className="mt-1 text-xs text-[var(--color-steel)]">

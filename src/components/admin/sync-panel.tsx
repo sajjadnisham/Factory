@@ -72,7 +72,7 @@ export function SyncPanel({ lastRun, openIssueCount }: Props) {
       </div>
 
       {error && (
-        <p role="alert" className="mt-3 rounded border-2 border-[var(--color-danger)] bg-white p-2.5 text-sm">
+        <p role="alert" className="mt-3 rounded border-2 border-[var(--color-danger)] bg-[var(--color-white)] p-2.5 text-sm">
           {error}
         </p>
       )}
@@ -80,7 +80,7 @@ export function SyncPanel({ lastRun, openIssueCount }: Props) {
       {shown && (
         <pre
           aria-live="polite"
-          className="mt-3 overflow-x-auto rounded-lg border-2 border-[var(--color-ink)] bg-[var(--color-ink)] p-3 text-xs leading-relaxed text-[var(--color-volt)]"
+          className="mt-3 overflow-x-auto rounded-lg border-2 border-[var(--color-ink)] bg-[var(--color-slab)] p-3 text-xs leading-relaxed text-[var(--color-volt)]"
         >
 {`Scanning Stock Folder...
 Products Found: ${shown.productsFound}
@@ -103,7 +103,7 @@ ${report || !lastRun ? "SYNC COMPLETE" : `STATUS: ${lastRun.status.toUpperCase()
                 className={`rounded border-2 p-2 text-xs ${
                   issue.severity === "error"
                     ? "border-[var(--color-danger)]"
-                    : "border-[var(--color-mist)]"
+                    : "border-[var(--color-line)]"
                 }`}
               >
                 <span className="font-bold uppercase">{issue.folderName}</span>

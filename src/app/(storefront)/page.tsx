@@ -29,11 +29,11 @@ export default async function HomePage() {
   return (
     <div className="mx-auto max-w-6xl">
       {/* --- Hero ---------------------------------------------------------- */}
-      <section className="relative overflow-hidden border-b-[2.5px] border-[var(--color-ink)] bg-[var(--color-ink)] px-4 py-10 text-[var(--color-paper)] md:py-16">
+      <section className="relative overflow-hidden border-b-[2.5px] border-[var(--color-ink)] bg-[var(--color-slab)] px-4 py-10 text-[var(--color-on-slab)] md:py-16">
         <div className="stripes absolute -right-8 -top-8 h-40 w-40 opacity-20" aria-hidden />
         <div className="relative">
           <span className="sticker sticker-new">{settings.tagline}</span>
-          <h1 className="mt-3 max-w-lg text-4xl leading-[0.95] text-[var(--color-white)] md:text-6xl">
+          <h1 className="mt-3 max-w-lg text-4xl leading-[0.95] text-[var(--color-on-slab)] md:text-6xl">
             {settings.heroHeadline}
           </h1>
           <p className="mt-3 max-w-md text-sm text-[var(--color-mist)] md:text-base">
@@ -92,7 +92,7 @@ export default async function HomePage() {
       )}
 
       {/* --- Brand message ------------------------------------------------- */}
-      <section className="mx-4 my-6 border-[2.5px] border-[var(--color-ink)] bg-[var(--color-volt)] p-5 shadow-[6px_6px_0_var(--color-ink)]">
+      <section className="mx-4 my-6 border-[2.5px] border-[var(--color-ink)] bg-[var(--color-volt)] p-5 text-[var(--color-slab)] shadow-[6px_6px_0_var(--color-ink)]">
         <h2 className="section-title">{settings.storeName}</h2>
         <p className="mt-2 text-sm font-medium">{settings.brandMessage}</p>
         <p className="mt-3 text-xs font-bold uppercase">{settings.deliveryHeadline}</p>

@@ -9,18 +9,38 @@
  */
 
 @theme {
-  --color-ink: #0a0a0a;
-  --color-ink-soft: #1c1c1e;
-  --color-graphite: #2e2e32;
-  --color-steel: #6b6b73;
-  --color-mist: #b8b8bf;
-  --color-paper: #f4f4f2;
-  --color-white: #ffffff;
+  /*
+   * Dark by default, and dark only. Tokens are named for their ROLE, not their
+   * literal colour, which is why "ink" is a pale grey here: it is the
+   * foreground — type, borders, and the offset shadows the comic-card system
+   * casts. A light offset shadow on a dark ground is the same device the light
+   * theme used, read the other way round.
+   *
+   * Three roles had to be split out of the original palette, because each was
+   * doing two jobs that stop agreeing once the ground goes dark:
+   *   --color-slab     a deliberately dark bar or hero, which stays dark in
+   *                    both themes and is not the same thing as "foreground"
+   *   --color-on-slab  type sitting on one of those
+   *   --color-line     hairline rules and inactive tracks, which want a dark
+   *                    grey exactly where dim type wants a light one
+   */
+  --color-ink: #efefec;
+  --color-ink-soft: #d6d6d2;
+  --color-graphite: #a9a9b4;
+  --color-steel: #8b8b96;
+  --color-mist: #c3c3cb;
+  --color-paper: #0b0b0f;
+  --color-white: #17171d;
+
+  --color-slab: #121218;
+  --color-on-slab: #f4f4f2;
+  --color-line: #2d2d36;
 
   --color-volt: #ffd400;
   --color-volt-deep: #e5be00;
-  --color-electric: #1358ff;
-  --color-electric-deep: #0a3fc4;
+  --color-electric: #3d7bff;
+  --color-electric-deep: #1358ff;
+  --color-navy: #1d3f66;
 
   --color-success: #128a4a;
   --color-danger: #c62828;
@@ -50,6 +70,9 @@
     background: var(--color-paper);
     color: var(--color-ink);
     font-family: var(--font-body);
+    /* The fluid layer is fixed behind everything; this keeps it from being the
+       thing that paints the page when content is shorter than the viewport. */
+    position: relative;
     /* Bottom nav is fixed; keep the last section reachable above it. */
     padding-bottom: env(safe-area-inset-bottom);
     overscroll-behavior-y: none;
@@ -103,9 +126,9 @@
     box-shadow: 2px 2px 0 var(--color-ink);
   }
 
-  .sticker-new { background: var(--color-volt); color: var(--color-ink); }
-  .sticker-sale { background: var(--color-electric); color: var(--color-white); }
-  .sticker-out { background: var(--color-graphite); color: var(--color-white); }
+  .sticker-new { background: var(--color-volt); color: var(--color-slab); }
+  .sticker-sale { background: var(--color-electric); color: #ffffff; }
+  .sticker-out { background: var(--color-graphite); color: var(--color-slab); }
   .sticker-low { background: var(--color-white); color: var(--color-ink); }
 
   /* --- Buttons ---------------------------------------------------------- */
@@ -164,9 +187,9 @@
 
   .chip-row::-webkit-scrollbar { display: none; }
 
-  .btn-primary { background: var(--color-volt); color: var(--color-ink); }
-  .btn-dark { background: var(--color-ink); color: var(--color-white); }
-  .btn-electric { background: var(--color-electric); color: var(--color-white); }
+  .btn-primary { background: var(--color-volt); color: var(--color-slab); }
+  .btn-dark { background: var(--color-slab); color: var(--color-on-slab); }
+  .btn-electric { background: var(--color-electric); color: #ffffff; }
   .btn-ghost { background: var(--color-white); color: var(--color-ink); }
 
   /* --- Form fields ------------------------------------------------------ */
@@ -198,6 +221,95 @@
   a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
     outline: 3px solid var(--color-electric);
     outline-offset: 2px;
+  }
+
+
+  /* --- Fluid background -------------------------------------------------- */
+  /*
+   * Three slow-drifting colour fields behind every page.
+   *
+   * Deliberately CSS and not a WebGL fluid simulation. This store is browsed on
+   * phones over Maldivian mobile data, on a 512MB instance: a real solver would
+   * cost a canvas, a render loop and the battery to run it, for something that
+   * sits behind the product photos and must never compete with them. Three
+   * blurred radial gradients on long transform animations read as the same
+   * slow drift, cost one compositor layer, and never touch the main thread.
+   *
+   * Blend mode rather than opacity: on a near-black ground, screen keeps the
+   * brand colours from turning to grey silt where they overlap.
+   */
+  .fluid {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+    background: var(--color-paper);
+  }
+
+  .fluid span {
+    position: absolute;
+    display: block;
+    border-radius: 50%;
+    mix-blend-mode: screen;
+    filter: blur(70px);
+    will-change: transform;
+  }
+
+  .fluid .f1 {
+    width: 62vmax;
+    height: 62vmax;
+    top: -22vmax;
+    left: -18vmax;
+    background: radial-gradient(circle at 50% 50%, rgba(255, 212, 0, 0.30), rgba(255, 212, 0, 0) 68%);
+    animation: drift-1 34s ease-in-out infinite alternate;
+  }
+
+  .fluid .f2 {
+    width: 55vmax;
+    height: 55vmax;
+    top: 22vmax;
+    right: -24vmax;
+    background: radial-gradient(circle at 50% 50%, rgba(61, 123, 255, 0.28), rgba(61, 123, 255, 0) 68%);
+    animation: drift-2 44s ease-in-out infinite alternate;
+  }
+
+  .fluid .f3 {
+    width: 48vmax;
+    height: 48vmax;
+    bottom: -20vmax;
+    left: 12vmax;
+    background: radial-gradient(circle at 50% 50%, rgba(29, 63, 102, 0.55), rgba(29, 63, 102, 0) 70%);
+    animation: drift-3 52s ease-in-out infinite alternate;
+  }
+
+  /* A fine grain over the gradients. Without it the blurred fields band
+     visibly on the dark ground, especially on OLED phone screens. */
+  .fluid::after {
+    content: "";
+    position: absolute;
+    inset: -50%;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  @keyframes drift-1 {
+    from { transform: translate3d(0, 0, 0) scale(1); }
+    to   { transform: translate3d(14vmax, 10vmax, 0) scale(1.18); }
+  }
+
+  @keyframes drift-2 {
+    from { transform: translate3d(0, 0, 0) scale(1.1); }
+    to   { transform: translate3d(-16vmax, 14vmax, 0) scale(0.92); }
+  }
+
+  @keyframes drift-3 {
+    from { transform: translate3d(0, 0, 0) scale(0.95); }
+    to   { transform: translate3d(18vmax, -12vmax, 0) scale(1.22); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .fluid span { animation: none; }
   }
 
   /* --- Product grid ----------------------------------------------------- */

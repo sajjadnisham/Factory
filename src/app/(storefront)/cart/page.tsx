@@ -42,7 +42,7 @@ export default async function CartPage() {
       <CartLines lines={cart.lines} />
 
       {awayFromFree > 0 && settings.freeDeliveryThresholdMinor > 0 && (
-        <p className="mt-3 rounded-lg border-2 border-[var(--color-ink)] bg-[var(--color-volt)] p-2.5 text-center text-xs font-bold uppercase">
+        <p className="mt-3 rounded-lg border-2 border-[var(--color-ink)] bg-[var(--color-volt)] p-2.5 text-center text-xs font-bold uppercase text-[var(--color-slab)]">
           Add {formatMvr(awayFromFree)} more for free delivery
         </p>
       )}
@@ -65,7 +65,7 @@ export default async function CartPage() {
       </dl>
 
       {cart.hasIssues && (
-        <p role="alert" className="mt-3 rounded-lg border-2 border-[var(--color-danger)] bg-white p-3 text-sm">
+        <p role="alert" className="mt-3 rounded-lg border-2 border-[var(--color-danger)] bg-[var(--color-white)] p-3 text-sm">
           Some items exceed the stock we have left. Reduce the quantity to continue.
         </p>
       )}

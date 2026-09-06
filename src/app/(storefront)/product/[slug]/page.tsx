@@ -119,7 +119,7 @@ export default async function ProductPage({
             </section>
           )}
 
-          <section className="mt-5 rounded-xl border-2 border-[var(--color-ink)] bg-white p-3.5 text-xs">
+          <section className="mt-5 rounded-xl border-2 border-[var(--color-ink)] bg-[var(--color-white)] p-3.5 text-xs">
             <p className="font-bold uppercase">Delivery</p>
             <p className="mt-1 text-[var(--color-graphite)]">
               {settings.deliveryEstimate}.{" "}

@@ -120,7 +120,7 @@ export function ProductGallery({
             onClick={() => scrollTo(index - 1)}
             disabled={index === 0}
             aria-label="Previous image"
-            className="absolute left-2 top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border-[2.5px] border-[var(--color-ink)] bg-white/90 disabled:opacity-30 md:flex"
+            className="absolute left-2 top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border-[2.5px] border-[var(--color-ink)] bg-[color-mix(in_srgb,var(--color-white)_90%,transparent)] disabled:opacity-30 md:flex"
           >
             <span aria-hidden>‹</span>
           </button>
@@ -129,7 +129,7 @@ export function ProductGallery({
             onClick={() => scrollTo(index + 1)}
             disabled={index === images.length - 1}
             aria-label="Next image"
-            className="absolute right-2 top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border-[2.5px] border-[var(--color-ink)] bg-white/90 disabled:opacity-30 md:flex"
+            className="absolute right-2 top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border-[2.5px] border-[var(--color-ink)] bg-[color-mix(in_srgb,var(--color-white)_90%,transparent)] disabled:opacity-30 md:flex"
           >
             <span aria-hidden>›</span>
           </button>
@@ -143,13 +143,13 @@ export function ProductGallery({
                 aria-label={`Go to image ${i + 1}`}
                 aria-current={i === index}
                 className={`h-2 rounded-full border-2 border-[var(--color-ink)] transition-all ${
-                  i === index ? "w-6 bg-[var(--color-volt)]" : "w-2 bg-white"
+                  i === index ? "w-6 bg-[var(--color-volt)]" : "w-2 bg-[var(--color-line)]"
                 }`}
               />
             ))}
           </div>
 
-          <span className="absolute right-2.5 top-2.5 rounded-full border-2 border-[var(--color-ink)] bg-white/90 px-2 py-0.5 text-[10px] font-bold">
+          <span className="absolute right-2.5 top-2.5 rounded-full border-2 border-[var(--color-ink)] bg-[color-mix(in_srgb,var(--color-white)_90%,transparent)] px-2 py-0.5 text-[10px] font-bold">
             {index + 1}/{images.length}
           </span>
         </>

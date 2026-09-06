@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+
+import { FactoryLogo } from "@/components/brand/factory-logo";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -28,7 +30,7 @@ export function SiteHeader({ storeName, categories, cartCount, promoMessage }: P
   return (
     <header className="sticky top-0 z-40 border-b-[2.5px] border-[var(--color-ink)] bg-[var(--color-white)]">
       {promoMessage && (
-        <div className="bg-[var(--color-ink)] px-3 py-1.5 text-center text-[11px] font-semibold uppercase tracking-wide text-[var(--color-volt)]">
+        <div className="bg-[var(--color-slab)] px-3 py-1.5 text-center text-[11px] font-semibold uppercase tracking-wide text-[var(--color-volt)]">
           {promoMessage}
         </div>
       )}
@@ -46,8 +48,11 @@ export function SiteHeader({ storeName, categories, cartCount, promoMessage }: P
           </span>
         </button>
 
-        <Link href="/" className="display text-lg tracking-tight md:text-2xl">
-          {storeName}
+        {/* The wordmark is the way home from every page, which is what people
+            reach for first. storeName stays as the accessible name so the link
+            still reads correctly when the settings rename the store. */}
+        <Link href="/" aria-label={`${storeName} — home`} className="shrink-0">
+          <FactoryLogo title="" className="h-9 w-auto md:h-11" />
         </Link>
 
         <nav className="ml-6 hidden gap-5 md:flex">
@@ -79,7 +84,7 @@ export function SiteHeader({ storeName, categories, cartCount, promoMessage }: P
           <Link
             href="/cart"
             aria-label={`Cart, ${cartCount} item${cartCount === 1 ? "" : "s"}`}
-            className="relative flex h-10 w-10 items-center justify-center rounded-lg border-[2.5px] border-[var(--color-ink)] bg-[var(--color-volt)]"
+            className="relative flex h-10 w-10 items-center justify-center rounded-lg border-[2.5px] border-[var(--color-ink)] bg-[var(--color-volt)] text-[var(--color-slab)]"
           >
             <span aria-hidden>🛒</span>
             {cartCount > 0 && (

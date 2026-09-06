@@ -18,7 +18,7 @@ export function statusLabel(status: string): string {
 export function OrderTimeline({ status }: { status: string }) {
   if (status === "cancelled") {
     return (
-      <div className="rounded-lg border-2 border-[var(--color-danger)] bg-white p-3">
+      <div className="rounded-lg border-2 border-[var(--color-danger)] bg-[var(--color-white)] p-3">
         <p className="text-sm font-bold uppercase text-[var(--color-danger)]">
           Order cancelled
         </p>
@@ -39,7 +39,7 @@ export function OrderTimeline({ status }: { status: string }) {
               <span
                 aria-hidden
                 className={`flex h-6 w-6 items-center justify-center rounded-full border-2 border-[var(--color-ink)] text-[10px] font-bold ${
-                  done ? "bg-[var(--color-volt)]" : "bg-white text-[var(--color-mist)]"
+                  done ? "bg-[var(--color-volt)] text-[var(--color-slab)]" : "bg-[var(--color-white)] text-[var(--color-steel)]"
                 }`}
               >
                 {done ? "✓" : i + 1}
@@ -48,7 +48,7 @@ export function OrderTimeline({ status }: { status: string }) {
                 <span
                   aria-hidden
                   className={`w-0.5 flex-1 ${
-                    i < currentIndex ? "bg-[var(--color-ink)]" : "bg-[var(--color-mist)]"
+                    i < currentIndex ? "bg-[var(--color-ink)]" : "bg-[var(--color-line)]"
                   }`}
                   style={{ minHeight: 20 }}
                 />

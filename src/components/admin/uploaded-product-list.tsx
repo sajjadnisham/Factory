@@ -53,7 +53,7 @@ export function UploadedProductList({ products }: Props) {
       </div>
 
       {error && (
-        <p role="alert" className="rounded-lg border-2 border-[var(--color-electric)] bg-white p-2.5 text-xs font-semibold text-[var(--color-electric)]">
+        <p role="alert" className="rounded-lg border-2 border-[var(--color-electric)] bg-[var(--color-white)] p-2.5 text-xs font-semibold text-[var(--color-electric)]">
           {error}
         </p>
       )}

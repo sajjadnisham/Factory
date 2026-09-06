@@ -210,7 +210,7 @@ export default async function StaticPage({
         </section>
       ))}
 
-      <p className="mt-8 rounded-lg border-2 border-[var(--color-mist)] bg-white p-3 text-xs text-[var(--color-steel)]">
+      <p className="mt-8 rounded-lg border-2 border-[var(--color-line)] bg-[var(--color-white)] p-3 text-xs text-[var(--color-steel)]">
         Placeholder content. Replace the bracketed sections with your own policy
         text before launch — this has not been legally reviewed.
       </p>

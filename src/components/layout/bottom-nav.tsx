@@ -30,7 +30,7 @@ export function BottomNav({ cartCount }: { cartCount: number }) {
                 href={item.href}
                 aria-current={active ? "page" : undefined}
                 className={`flex min-h-[56px] flex-col items-center justify-center gap-0.5 text-[10px] font-bold uppercase ${
-                  active ? "bg-[var(--color-volt)]" : ""
+                  active ? "bg-[var(--color-volt)] text-[var(--color-slab)]" : ""
                 }`}
               >
                 <span aria-hidden className="relative text-base leading-none">
