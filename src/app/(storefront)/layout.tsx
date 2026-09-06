@@ -39,12 +39,15 @@ export default async function StorefrontLayout({
         promoMessage={settings.promoMessage}
       />
 
-      {/* Bottom padding clears the fixed mobile nav. */}
-      <main id="main" className="pb-24 md:pb-8">
-        {children}
-      </main>
+      <main id="main">{children}</main>
 
-      <SiteFooter settings={settings} categories={categories} />
+      {/* The fixed mobile nav is cleared here, at the very bottom of the page.
+          Putting this padding on <main> instead opened a dead band between the
+          last section and the footer — and still left the footer's final line
+          sitting under the nav. */}
+      <div className="pb-20 md:pb-0">
+        <SiteFooter settings={settings} categories={categories} />
+      </div>
       <BottomNav cartCount={cart.itemCount} />
     </>
   );

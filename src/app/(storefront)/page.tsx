@@ -35,23 +35,48 @@ export default async function HomePage() {
         crosses six hues and is legible against none of them; below the form,
         on the near-black ground, it needs no scrim and the ring stays whole.
       */}
-      <section className="relative overflow-hidden px-5 pb-9 pt-4 text-[var(--color-on-slab)]">
-        <div className="relative mx-auto flex aspect-square w-full max-w-[22rem] items-center justify-center">
-          <div className="eclipse inset-0" aria-hidden />
-          <span className="relative text-center font-[family-name:var(--font-body)] text-[0.65rem] uppercase tracking-[0.34em] text-[var(--color-mist)]">
-            {settings.tagline}
-          </span>
-        </div>
+      {/*
+        Full-bleed, the way the reference frames it: the gradient runs edge to
+        edge and past them, with a small two-line label set into the top-left
+        corner rather than a headline laid across the middle. Type over the
+        centre of a chromatic ring crosses six hues and is legible against none
+        of them; type in the corner sits on near-black and needs no scrim.
+      */}
+      <section className="relative overflow-hidden text-[var(--color-on-slab)]">
+        <div className="relative aspect-[4/5] w-full sm:aspect-[16/10]">
+          {/* Wider than the screen and pushed up, so the ring is cropped by the
+              frame instead of floating inside it. */}
+          <div
+            className="eclipse left-1/2 top-[34%] h-[118vw] w-[118vw] -translate-x-1/2 -translate-y-1/2 sm:h-[58vw] sm:w-[58vw]"
+            aria-hidden
+          />
 
-        <h1 className="mt-2 text-[2.6rem] leading-[0.92] tracking-tight text-[var(--color-on-slab)] md:text-6xl">
-          {settings.heroHeadline}
-        </h1>
-        <p className="mt-3 max-w-md text-sm text-[var(--color-mist)] md:text-base">
-          {settings.heroSubline}
-        </p>
-        <Link href="/shop" className="btn btn-primary mt-6 text-sm">
-          {settings.heroCtaLabel}
-        </Link>
+          {/* The ring is lifted into the upper two-thirds and this scrim seals
+              the bottom, so the headline lands on near-black instead of
+              crossing four hues. Without one or the other, white type sits on
+              cyan and amber at once and reads against neither. */}
+          <div
+            className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[var(--color-paper)] via-[color-mix(in_srgb,var(--color-paper)_72%,transparent)] to-transparent"
+            aria-hidden
+          />
+
+          <div className="relative flex h-full flex-col justify-between p-5">
+            <p className="max-w-[15rem] text-[0.7rem] leading-relaxed text-[var(--color-mist)]">
+              {settings.tagline}
+              <br />
+              {settings.heroSubline}
+            </p>
+
+            <div>
+              <h1 className="text-[2.4rem] leading-[0.9] tracking-tight text-[var(--color-on-slab)] sm:text-5xl">
+                {settings.heroHeadline}
+              </h1>
+              <Link href="/shop" className="btn btn-primary mt-5 text-sm">
+                {settings.heroCtaLabel}
+              </Link>
+            </div>
+          </div>
+        </div>
       </section>
 
       {empty ? (

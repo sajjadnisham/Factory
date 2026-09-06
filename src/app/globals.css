@@ -457,6 +457,23 @@
    */
   .rail {
     --rail-card: 80%;
+    /*
+     * Without this, the rail breaks the phone.
+     *
+     * A horizontally scrolling grid is already a scroll container, so its
+     * contents are clipped — but they still contribute their max-content width
+     * to the initial containing block, and mobile browsers size the *layout
+     * viewport* from that. Four rails of nine cards pushed the layout viewport
+     * to 1572px on a 393px phone, and every `position: fixed` element is laid
+     * out against that viewport: the bottom navigation became 1572px wide with
+     * five 314px tabs, so only HOME was on screen. Desktop Chrome, whose layout
+     * viewport never grows, rendered it perfectly at every width.
+     *
+     * `contain: paint` states what is already true — descendants never paint
+     * outside this box — which stops that contribution at the rail. Measured
+     * under Pixel 5 emulation: 1572px viewport before, 393px after.
+     */
+    contain: paint;
     display: grid;
     grid-auto-flow: column;
     grid-auto-columns: var(--rail-card);
