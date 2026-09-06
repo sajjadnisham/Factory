@@ -33,6 +33,18 @@
   --color-white: #17171d;
 
   --color-slab: #121218;
+  /*
+   * Literal white, for type that sits on a surface which is dark in every
+   * theme — the electric-blue banners, and anything laid over a photograph.
+   *
+   * Tailwind v4 resolves `text-white` to the `--color-white` *theme token*, and
+   * this store redefines that token to #17171d, its raised dark surface. So
+   * `text-white` here paints dark type on dark ground: it is why the demo
+   * banner's text went black on blue and a product's price vanished into its
+   * own photograph. Use `text-chalk` for white; `--color-white` remains the
+   * surface it is named for.
+   */
+  --color-chalk: #ffffff;
 
   /* The iridescent sweep the whole surface treatment is built from: one hue
      circuit, blue through violet, magenta, ember, amber and back via cyan.
@@ -163,7 +175,7 @@
   }
 
   .sticker-new { background: color-mix(in srgb, var(--color-volt) 88%, transparent); color: var(--color-slab); }
-  .sticker-sale { background: var(--color-electric); color: #ffffff; }
+  .sticker-sale { background: var(--color-electric); color: var(--color-chalk); }
   .sticker-out { background: var(--color-graphite); color: var(--color-slab); }
   .sticker-low { background: color-mix(in srgb, var(--color-white) 70%, transparent); color: var(--color-ink); }
 
@@ -224,7 +236,7 @@
 
   .btn-primary { background: var(--color-volt); color: var(--color-slab); }
   .btn-dark { background: var(--color-slab); color: var(--color-on-slab); }
-  .btn-electric { background: var(--color-electric); color: #ffffff; }
+  .btn-electric { background: var(--color-electric); color: var(--color-chalk); }
   .btn-ghost {
     background: color-mix(in srgb, var(--color-white) 60%, transparent);
     color: var(--color-ink);

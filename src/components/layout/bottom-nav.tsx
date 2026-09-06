@@ -36,7 +36,7 @@ export function BottomNav({ cartCount }: { cartCount: number }) {
                 <span aria-hidden className="relative text-base leading-none">
                   {item.icon}
                   {item.href === "/cart" && cartCount > 0 && (
-                    <span className="absolute -right-2.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full border border-[var(--color-ink)] bg-[var(--color-electric)] px-0.5 text-[9px] text-white">
+                    <span className="absolute -right-2.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full border border-[var(--color-ink)] bg-[var(--color-electric)] px-0.5 text-[9px] text-chalk">
                       {cartCount > 9 ? "9+" : cartCount}
                     </span>
                   )}
