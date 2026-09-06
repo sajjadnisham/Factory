@@ -52,7 +52,7 @@ export function SiteHeader({ storeName, categories, cartCount, promoMessage }: P
             reach for first. storeName stays as the accessible name so the link
             still reads correctly when the settings rename the store. */}
         <Link href="/" aria-label={`${storeName} — home`} className="shrink-0">
-          <FactoryLogo title="" className="h-9 w-auto md:h-11" />
+          <FactoryLogo title="" className="h-12 w-auto md:h-16" />
         </Link>
 
         <nav className="ml-6 hidden gap-5 md:flex">

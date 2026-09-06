@@ -14,7 +14,7 @@ export function SiteFooter({ settings, categories }: Props) {
     <footer className="border-t-[2.5px] border-[var(--color-ink)] bg-[var(--color-slab)] text-[var(--color-on-slab)]">
       <div className="mx-auto max-w-6xl px-4 py-8">
         <Link href="/" aria-label={`${settings.storeName} — home`} className="inline-block">
-          <FactoryLogo title="" className="h-14 w-auto" />
+          <FactoryLogo title="" className="h-20 w-auto" />
         </Link>
         <p className="mt-2 max-w-md text-sm text-[var(--color-mist)]">
           {settings.brandMessage}

@@ -389,21 +389,52 @@ type on the yellow "Shop now" button in the first pass.
 
 ### The fluid background
 
-Three slow-drifting colour fields sit behind every page, storefront and admin
-alike, mounted once in the root layout so the drift carries across navigation
-instead of restarting.
+Two layers, behind every page, mounted once in the root layout so they carry
+across navigation instead of restarting.
 
-Deliberately CSS, not a WebGL fluid simulation. This store is browsed on phones
-over mobile data, on a 512MB instance: a real solver would cost a canvas, a
-render loop and the battery to run it, for something that sits behind the
-product photos and must never compete with them. Three blurred radial gradients
-on long transform animations read as the same slow drift, cost one compositor
-layer, and never touch the main thread. `prefers-reduced-motion` stops them.
+The base is three blurred radial gradients on long transform animations. It is
+painted server-side, so it is what a visitor sees before JavaScript runs, on a
+device without WebGL, and under `prefers-reduced-motion` — in which case it
+simply stays put.
 
-They are blended with `screen` rather than faded with opacity, because on a
+Over it, `FluidCanvas` runs a domain-warped noise field: one fragment shader on
+a single fullscreen triangle, one draw call per frame, no geometry and no
+textures. The output of one fbm displaces the input of the next, and that
+feedback is what makes the bands fold over each other like something being
+stirred rather than slide past like fog.
+
+It is not a Navier-Stokes solver; it is the look of one, which is what a
+background behind product photography actually needs. A real solver means a
+velocity field, a pressure solve and several render targets per frame, on phones
+over mobile data.
+
+Four things keep it from being a battery tax: a half-resolution buffer capped at
+1.5× device pixels (the field is all low-frequency, so nobody can see the
+difference), ~30fps rather than the display refresh rate, a full stop when the
+tab is hidden, and never starting at all under reduced motion or without WebGL.
+
+Both layers blend with `screen` rather than fading with opacity, because on a
 near-black ground opacity turns the brand colours to grey silt where they
 overlap. A faint noise layer sits on top: without it the blurred fields band
 visibly, especially on OLED phone screens.
+
+### Typography
+
+| role | face | why |
+|---|---|---|
+| headings | Anton | a tall condensed grotesque with the proportions of a fly-poster — the right register for streetwear, and thick enough not to bloom and thin out against near-black |
+| body | Manrope, 500 | light-on-dark type optically thins, so 500 here reads the way 400 reads on white; wide apertures and a tall x-height keep a size run legible at 10px |
+| wordmark | Archivo Black | the logo is a wide varsity block and Anton is condensed; sharing one face between them would make the mark something it is not |
+
+Anton ships a single weight, so headings ask for 400 — requesting 900 makes the
+browser synthesise a bold it does not have and smears the stems. It is also
+condensed, so it takes positive tracking where a wide face would carry the
+negative tracking the light theme used.
+
+None of these actually loaded until this was written down: `globals.css` asked
+for the literal family `"Archivo Black"`, but `next/font` exposes a generated
+name through a CSS variable and never registers the plain one. Every page had
+been rendering in its fallback.
 
 ### The wordmark
 
@@ -413,6 +444,14 @@ second request per page, no file per density, and its colours come from the same
 tokens as everything else so it cannot drift out of the palette. The arch is
 real text on a path, not outlines, so it stays selectable and its accessible
 name comes from the type itself.
+
+Its geometry is worked out rather than eyeballed, because the first version was
+not: a quadratic sits at `(P0 + 2·P1 + P2)/4` at its midpoint, so an arc from
+`(14,80)` through control `(150,4)` crests at y=42 — and 58px type has roughly
+42px of cap height above its baseline, which put the tops of the middle letters
+at y=0 and cropped them against the viewBox edge. The current arc crests at 65
+with 39px caps, leaving 26px of clear space, and the ribbon finishes at 132
+inside a 140-tall box.
 
 It appears in the header and the footer, and both are links to `/`.
 
