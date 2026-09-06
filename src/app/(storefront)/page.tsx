@@ -29,20 +29,29 @@ export default async function HomePage() {
   return (
     <div className="mx-auto max-w-6xl">
       {/* --- Hero ---------------------------------------------------------- */}
-      <section className="relative overflow-hidden border-b-[2.5px] border-[var(--color-ink)] bg-[var(--color-slab)] px-4 py-10 text-[var(--color-on-slab)] md:py-16">
-        <div className="stripes absolute -right-8 -top-8 h-40 w-40 opacity-20" aria-hidden />
-        <div className="relative">
-          <span className="sticker sticker-new">{settings.tagline}</span>
-          <h1 className="mt-3 max-w-lg text-4xl leading-[0.95] text-[var(--color-on-slab)] md:text-6xl">
-            {settings.heroHeadline}
-          </h1>
-          <p className="mt-3 max-w-md text-sm text-[var(--color-mist)] md:text-base">
-            {settings.heroSubline}
-          </p>
-          <Link href="/shop" className="btn btn-primary mt-5 text-base">
-            {settings.heroCtaLabel}
-          </Link>
+      {/*
+        The eclipse is the hero, and the words sit under it rather than over it.
+        Laying type across the middle of a chromatic ring means the headline
+        crosses six hues and is legible against none of them; below the form,
+        on the near-black ground, it needs no scrim and the ring stays whole.
+      */}
+      <section className="relative overflow-hidden px-5 pb-9 pt-4 text-[var(--color-on-slab)]">
+        <div className="relative mx-auto flex aspect-square w-full max-w-[22rem] items-center justify-center">
+          <div className="eclipse inset-0" aria-hidden />
+          <span className="relative text-center font-[family-name:var(--font-body)] text-[0.65rem] uppercase tracking-[0.34em] text-[var(--color-mist)]">
+            {settings.tagline}
+          </span>
         </div>
+
+        <h1 className="mt-2 text-[2.6rem] leading-[0.92] tracking-tight text-[var(--color-on-slab)] md:text-6xl">
+          {settings.heroHeadline}
+        </h1>
+        <p className="mt-3 max-w-md text-sm text-[var(--color-mist)] md:text-base">
+          {settings.heroSubline}
+        </p>
+        <Link href="/shop" className="btn btn-primary mt-6 text-sm">
+          {settings.heroCtaLabel}
+        </Link>
       </section>
 
       {empty ? (
@@ -64,15 +73,15 @@ export default async function HomePage() {
         <>
           {/* --- Categories ------------------------------------------------ */}
           {categories.length > 0 && (
-            <section className="px-4 py-5">
-              <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+            <section className="px-5 py-4">
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                 {categories.map((category) => (
                   <Link
                     key={category.slug}
                     href={`/shop/${category.slug}`}
-                    className="comic-card flex items-center justify-between p-3"
+                    className="comic-card flex items-center justify-between px-3.5 py-3"
                   >
-                    <span className="text-sm font-semibold uppercase tracking-wide">
+                    <span className="text-[0.8rem] font-semibold uppercase tracking-[0.12em]">
                       {category.name}
                     </span>
                     <span className="text-xs text-[var(--color-steel)]">
@@ -92,12 +101,14 @@ export default async function HomePage() {
       )}
 
       {/* --- Brand message ------------------------------------------------- */}
-      <section className="mx-4 my-6 border-[2.5px] border-[var(--color-ink)] bg-[var(--color-volt)] p-5 text-[var(--color-slab)] shadow-[6px_6px_0_var(--color-ink)]">
+      <section className="iris-wash relative mx-5 my-7 overflow-hidden rounded-[26px] border border-[color-mix(in_srgb,var(--color-ink)_14%,transparent)] p-6">
         <h2 className="section-title">{settings.storeName}</h2>
-        <p className="mt-2 text-sm font-medium">{settings.brandMessage}</p>
-        <p className="mt-3 text-xs font-bold uppercase">{settings.deliveryHeadline}</p>
-        <p className="mt-1 text-xs font-semibold">
-          {settings.deliveryAreas.join(" • ")}
+        <p className="mt-2 max-w-sm text-sm text-[var(--color-ink)]">{settings.brandMessage}</p>
+        <p className="mt-4 text-[0.65rem] uppercase tracking-[0.2em] text-[var(--color-volt)]">
+          {settings.deliveryHeadline}
+        </p>
+        <p className="mt-1.5 text-[0.7rem] text-[var(--color-mist)]">
+          {settings.deliveryAreas.join(" · ")}
         </p>
       </section>
     </div>
@@ -118,10 +129,13 @@ function ProductRail({
   if (products.length === 0) return null;
 
   return (
-    <section className="px-4 py-4">
-      <div className="mb-2.5 flex items-baseline justify-between">
+    <section className="px-5 py-4">
+      <div className="mb-3 flex items-baseline justify-between">
         <h2 className="section-title">{title}</h2>
-        <Link href={href} className="text-xs font-bold uppercase underline">
+        <Link
+          href={href}
+          className="text-[0.65rem] uppercase tracking-[0.18em] text-[var(--color-steel)]"
+        >
           See all
         </Link>
       </div>

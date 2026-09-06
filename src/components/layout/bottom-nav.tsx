@@ -18,7 +18,7 @@ export function BottomNav({ cartCount }: { cartCount: number }) {
   return (
     <nav
       aria-label="Main"
-      className="fixed inset-x-0 bottom-0 z-40 border-t-[2.5px] border-[var(--color-ink)] bg-[var(--color-white)] pb-[env(safe-area-inset-bottom)] md:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-[color-mix(in_srgb,var(--color-ink)_12%,transparent)] bg-[color-mix(in_srgb,var(--color-paper)_74%,transparent)] pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden"
     >
       <ul className="grid grid-cols-5">
         {ITEMS.map((item) => {
@@ -30,7 +30,7 @@ export function BottomNav({ cartCount }: { cartCount: number }) {
                 href={item.href}
                 aria-current={active ? "page" : undefined}
                 className={`flex min-h-[56px] flex-col items-center justify-center gap-0.5 text-[10px] font-bold uppercase ${
-                  active ? "bg-[var(--color-volt)] text-[var(--color-slab)]" : ""
+                  active ? "bg-[var(--color-volt)] text-[var(--color-slab)]" : "text-[var(--color-steel)]"
                 }`}
               >
                 <span aria-hidden className="relative text-base leading-none">

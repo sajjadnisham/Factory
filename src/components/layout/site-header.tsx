@@ -28,9 +28,9 @@ export function SiteHeader({ storeName, categories, cartCount, promoMessage }: P
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b-[2.5px] border-[var(--color-ink)] bg-[var(--color-white)]">
+    <header className="sticky top-0 z-40 border-b border-[color-mix(in_srgb,var(--color-ink)_12%,transparent)] bg-[color-mix(in_srgb,var(--color-paper)_72%,transparent)] backdrop-blur-xl">
       {promoMessage && (
-        <div className="bg-[var(--color-slab)] px-3 py-1.5 text-center text-[11px] font-semibold uppercase tracking-wide text-[var(--color-volt)]">
+        <div className="px-3 py-1.5 text-center text-[0.6rem] uppercase tracking-[0.22em] text-[var(--color-volt)]">
           {promoMessage}
         </div>
       )}
@@ -41,7 +41,7 @@ export function SiteHeader({ storeName, categories, cartCount, promoMessage }: P
           onClick={() => setMenuOpen((v) => !v)}
           aria-expanded={menuOpen}
           aria-label="Menu"
-          className="flex h-10 w-10 items-center justify-center rounded-lg border-[2.5px] border-[var(--color-ink)] bg-[var(--color-white)] md:hidden"
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-[color-mix(in_srgb,var(--color-ink)_16%,transparent)] bg-[color-mix(in_srgb,var(--color-white)_55%,transparent)] md:hidden"
         >
           <span aria-hidden className="text-lg leading-none">
             {menuOpen ? "✕" : "☰"}
@@ -76,7 +76,7 @@ export function SiteHeader({ storeName, categories, cartCount, promoMessage }: P
             onClick={() => setSearchOpen((v) => !v)}
             aria-label="Search"
             aria-expanded={searchOpen}
-            className="flex h-10 w-10 items-center justify-center rounded-lg border-[2.5px] border-[var(--color-ink)] bg-[var(--color-white)]"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-[color-mix(in_srgb,var(--color-ink)_16%,transparent)] bg-[color-mix(in_srgb,var(--color-white)_55%,transparent)]"
           >
             <span aria-hidden>🔍</span>
           </button>
@@ -84,7 +84,7 @@ export function SiteHeader({ storeName, categories, cartCount, promoMessage }: P
           <Link
             href="/cart"
             aria-label={`Cart, ${cartCount} item${cartCount === 1 ? "" : "s"}`}
-            className="relative flex h-10 w-10 items-center justify-center rounded-lg border-[2.5px] border-[var(--color-ink)] bg-[var(--color-volt)] text-[var(--color-slab)]"
+            className="relative flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-volt)] text-[var(--color-slab)]"
           >
             <span aria-hidden>🛒</span>
             {cartCount > 0 && (
@@ -97,7 +97,7 @@ export function SiteHeader({ storeName, categories, cartCount, promoMessage }: P
           <Link
             href="/account"
             aria-label="Account"
-            className="hidden h-10 w-10 items-center justify-center rounded-lg border-[2.5px] border-[var(--color-ink)] bg-[var(--color-white)] md:flex"
+            className="hidden h-10 w-10 items-center justify-center rounded-full border border-[color-mix(in_srgb,var(--color-ink)_16%,transparent)] bg-[color-mix(in_srgb,var(--color-white)_55%,transparent)] md:flex"
           >
             <span aria-hidden>👤</span>
           </Link>
@@ -105,7 +105,7 @@ export function SiteHeader({ storeName, categories, cartCount, promoMessage }: P
       </div>
 
       {searchOpen && (
-        <form onSubmit={submitSearch} className="border-t-2 border-[var(--color-ink)] p-3">
+        <form onSubmit={submitSearch} className="border-t border-[color-mix(in_srgb,var(--color-ink)_12%,transparent)] p-3">
           <div className="mx-auto flex max-w-6xl gap-2">
             <input
               // eslint-disable-next-line jsx-a11y/no-autofocus -- the field is
@@ -127,7 +127,7 @@ export function SiteHeader({ storeName, categories, cartCount, promoMessage }: P
       )}
 
       {menuOpen && (
-        <nav className="border-t-2 border-[var(--color-ink)] bg-[var(--color-white)] p-3 md:hidden">
+        <nav className="border-t border-[color-mix(in_srgb,var(--color-ink)_12%,transparent)] p-3 md:hidden">
           <ul className="grid gap-1.5">
             {[
               { href: "/shop", label: "All products" },
@@ -142,7 +142,7 @@ export function SiteHeader({ storeName, categories, cartCount, promoMessage }: P
                 <Link
                   href={item.href}
                   onClick={() => setMenuOpen(false)}
-                  className="block rounded-lg border-2 border-[var(--color-ink)] px-3 py-2.5 font-semibold uppercase"
+                  className="block rounded-2xl border border-[color-mix(in_srgb,var(--color-ink)_14%,transparent)] px-4 py-3 text-sm font-semibold uppercase tracking-[0.08em]"
                 >
                   {item.label}
                 </Link>

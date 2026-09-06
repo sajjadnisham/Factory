@@ -48,11 +48,11 @@ export function ProductCard({
   return (
     <Link
       href={`/product/${product.slug}`}
-      className="comic-card group flex flex-col overflow-hidden"
+      className="comic-card group flex flex-col overflow-hidden p-1"
     >
       <span className="sr-only">{product.name}</span>
 
-      <div className="relative aspect-[3/4] overflow-hidden border-b-[2.5px] border-[var(--color-ink)] bg-[var(--color-paper)]">
+      <div className="relative aspect-[3/4] overflow-hidden rounded-[21px] bg-[color-mix(in_srgb,var(--color-paper)_80%,transparent)]">
         {image ? (
           <Image
             src={image.url}
@@ -70,7 +70,7 @@ export function ProductCard({
         )}
 
         {badge && (
-          <span className={`sticker ${badge.className} absolute left-1.5 top-1.5`}>
+          <span className={`sticker ${badge.className} absolute left-2.5 top-2.5`}>
             {badge.label}
           </span>
         )}
@@ -80,8 +80,8 @@ export function ProductCard({
         )}
       </div>
 
-      <div className="flex items-end justify-between gap-2 p-2 sm:p-2.5">
-        <p className="text-[10px] font-semibold uppercase leading-tight text-[var(--color-steel)] sm:text-[11px]">
+      <div className="flex items-end justify-between gap-2 px-2 pb-1.5 pt-2">
+        <p className="text-[0.6rem] uppercase leading-tight tracking-[0.14em] text-[var(--color-steel)]">
           {product.inStock ? product.sizes.slice(0, 4).join(" · ") : "Out of stock"}
         </p>
 
@@ -91,7 +91,7 @@ export function ProductCard({
               {formatMvr(product.comparePriceMinor!)}
             </span>
           )}
-          <span className="display text-base leading-none sm:text-lg">
+          <span className="display text-[0.95rem] leading-none tracking-[0.01em] sm:text-base">
             {formatMvr(product.priceMinor)}
           </span>
         </div>

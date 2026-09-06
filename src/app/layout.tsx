@@ -90,7 +90,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${display.variable} ${body.variable} ${logo.variable}`}>
-      <body className="min-h-dvh">
+      <body className="relative min-h-dvh">
         {/*
           One fixed layer behind every page — storefront and admin alike —
           rather than a per-page background. Mounting it in the root layout
@@ -106,6 +106,9 @@ export default function RootLayout({
               canvas is the moving version of the same field, layered over. */}
           <FluidCanvas />
         </div>
+        {/* Above the background, beneath everything readable: the grain has to
+            fall on the gradients to dither them, but not on the type. */}
+        <div className="grain" aria-hidden="true" />
         {children}
       </body>
     </html>

@@ -87,9 +87,10 @@ void main() {
   float vignette = smoothstep(1.25, 0.15, length(uv - 0.5));
   col *= vignette;
 
-  // Held well down: this sits behind photographs of clothes, and the clothes
-  // are the thing being sold.
-  gl_FragColor = vec4(col, 1.0) * 0.62;
+  // Held right down. The eclipse in the hero is the one thing on the page
+  // allowed to be bright; if the field competes with it the whole ground lifts
+  // to grey and the near-black this design depends on is gone.
+  gl_FragColor = vec4(col, 1.0) * 0.30;
 }
 `;
 
