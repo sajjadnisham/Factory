@@ -486,3 +486,24 @@ model StockFile {
   @@unique([folderId, name])
   @@index([folderId])
 }
+
+/// An uploaded piece of brand artwork — the wordmark and the roundel.
+///
+/// Kept in Postgres for the same reason product uploads are: a container on a
+/// free plan has no persistent disk, so anything written to ./public is gone on
+/// the next deploy. Storing them here means the store owner replaces their own
+/// logo from the admin, with no redeploy and no commit.
+///
+/// One row per slot, keyed by where it appears, so uploading again replaces the
+/// artwork rather than accumulating copies of it.
+model BrandAsset {
+  /// "logo" (header and footer wordmark) or "badge" (the hero roundel).
+  key       String   @id
+  mimeType  String
+  size      Int
+  /// Content hash, used as the ETag so a replaced logo busts browser caches.
+  checksum  String
+  bytes     Bytes
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+}

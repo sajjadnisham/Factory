@@ -15,6 +15,12 @@ import { db } from "@/lib/db";
 import { markOrderPaid, releaseOrderStock, updateOrderStatus } from "@/lib/orders/service";
 import { syncStock, type SyncReport } from "@/lib/products/sync";
 import {
+  deleteBrandAsset,
+  isBrandSlot,
+  saveBrandAsset,
+  validateBrandUpload,
+} from "@/lib/brand";
+import {
   deleteUploadedProduct,
   saveUploadedProduct,
   type UploadImage,
@@ -401,4 +407,52 @@ export async function deleteUploadedProductAction(
   revalidatePath("/");
 
   return { ok: true, report };
+}
+
+
+// ---------------------------------------------------------------------------
+// Brand artwork
+// ---------------------------------------------------------------------------
+
+/** Every surface the marks appear on, so a new logo is live immediately. */
+function revalidateBrand(): void {
+  revalidatePath("/", "layout");
+  revalidatePath("/admin/settings");
+}
+
+export async function uploadBrandAssetAction(
+  formData: FormData,
+): Promise<AdminResult> {
+  const auth = await requireAdminOrFail();
+  if (!auth.ok) return auth;
+
+  const key = String(formData.get("key") ?? "");
+  if (!isBrandSlot(key)) return { ok: false, error: "Unknown image slot." };
+
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) {
+    return { ok: false, error: "Choose a file first." };
+  }
+
+  const bytes = Buffer.from(await file.arrayBuffer());
+  const problem = validateBrandUpload({ mimeType: file.type, byteLength: bytes.byteLength });
+  if (problem) return { ok: false, error: problem };
+
+  await saveBrandAsset(key, { mimeType: file.type, bytes });
+  console.info(`[brand] ${key} replaced by ${auth.username}`);
+  revalidateBrand();
+  return { ok: true };
+}
+
+export async function deleteBrandAssetAction(key: string): Promise<AdminResult> {
+  const auth = await requireAdminOrFail();
+  if (!auth.ok) return auth;
+  if (!isBrandSlot(key)) return { ok: false, error: "Unknown image slot." };
+
+  const removed = await deleteBrandAsset(key);
+  if (!removed) return { ok: false, error: "There is nothing uploaded in that slot." };
+
+  console.info(`[brand] ${key} removed by ${auth.username}`);
+  revalidateBrand();
+  return { ok: true };
 }

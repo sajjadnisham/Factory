@@ -4,6 +4,7 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { getCart } from "@/lib/cart";
 import { getCategories } from "@/lib/catalog";
+import { getBrandAssets } from "@/lib/brand";
 import { getSettings } from "@/lib/settings";
 
 /**
@@ -15,11 +16,18 @@ export default async function StorefrontLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [settings, categories, cart] = await Promise.all([
+  const [settings, categories, cart, brand] = await Promise.all([
     getSettings(),
     getCategories(),
     getCart(),
+    getBrandAssets(),
   ]);
+
+  // The checksum in the query string is what makes a replaced logo appear
+  // immediately rather than after the browser's cache expires.
+  const logoUrl = brand.logo
+    ? `/api/brand/logo?v=${brand.logo.checksum.slice(0, 12)}`
+    : null;
 
   return (
     <>
@@ -33,6 +41,7 @@ export default async function StorefrontLayout({
       <DemoBanner />
 
       <SiteHeader
+        logoUrl={logoUrl}
         storeName={settings.logoText}
         categories={categories}
         cartCount={cart.itemCount}
@@ -46,7 +55,7 @@ export default async function StorefrontLayout({
           last section and the footer — and still left the footer's final line
           sitting under the nav. */}
       <div className="pb-20 md:pb-0">
-        <SiteFooter settings={settings} categories={categories} />
+        <SiteFooter settings={settings} categories={categories} logoUrl={logoUrl} />
       </div>
       <BottomNav cartCount={cart.itemCount} />
     </>

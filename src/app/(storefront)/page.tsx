@@ -8,6 +8,7 @@ import {
   getNewArrivals,
   getProductsByType,
 } from "@/lib/catalog";
+import { getBrandAssets } from "@/lib/brand";
 import { getSettings } from "@/lib/settings";
 
 // Products change whenever the owner syncs STOCK, so the homepage is rendered
@@ -15,9 +16,10 @@ import { getSettings } from "@/lib/settings";
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const [settings, categories, newArrivals, featured, tees, pants] =
+  const [settings, brand, categories, newArrivals, featured, tees, pants] =
     await Promise.all([
       getSettings(),
+      getBrandAssets(),
       getCategories(),
       getNewArrivals(9),
       getFeaturedProducts(6),
@@ -58,7 +60,17 @@ export default async function HomePage() {
               reads as a halo around the mark rather than as decoration beside
               it. Sized and offset to match the ring's centre, not the frame's. */}
           <div className="pointer-events-none absolute left-1/2 top-[34%] w-[38vw] max-w-[9.5rem] -translate-x-1/2 -translate-y-1/2 sm:w-[16vw]">
-            <FactoryBadge className="h-auto w-full" />
+            {brand.badge ? (
+              /* eslint-disable-next-line @next/next/no-img-element -- unknown
+                 intrinsic size, served from our own route. */
+              <img
+                src={`/api/brand/badge?v=${brand.badge.checksum.slice(0, 12)}`}
+                alt=""
+                className="h-auto w-full"
+              />
+            ) : (
+              <FactoryBadge className="h-auto w-full" />
+            )}
           </div>
 
           {/* The ring is lifted into the upper two-thirds and this scrim seals

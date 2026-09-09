@@ -7,13 +7,21 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 interface Props {
+  /** Uploaded wordmark, when the owner has supplied one. Null draws the SVG. */
+  logoUrl: string | null;
   storeName: string;
   categories: { slug: string; name: string; count: number }[];
   cartCount: number;
   promoMessage: string;
 }
 
-export function SiteHeader({ storeName, categories, cartCount, promoMessage }: Props) {
+export function SiteHeader({
+  logoUrl,
+  storeName,
+  categories,
+  cartCount,
+  promoMessage,
+}: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [term, setTerm] = useState("");
@@ -52,7 +60,14 @@ export function SiteHeader({ storeName, categories, cartCount, promoMessage }: P
             reach for first. storeName stays as the accessible name so the link
             still reads correctly when the settings rename the store. */}
         <Link href="/" aria-label={`${storeName} — home`} className="shrink-0">
-          <FactoryLogo title="" className="h-12 w-auto md:h-16" />
+          {logoUrl ? (
+            /* eslint-disable-next-line @next/next/no-img-element -- the file is
+               of unknown dimensions and served from our own route, so next/image
+               would buy nothing and needs a width and height we do not have. */
+            <img src={logoUrl} alt="" className="h-12 w-auto md:h-16" />
+          ) : (
+            <FactoryLogo title="" className="h-12 w-auto md:h-16" />
+          )}
         </Link>
 
         <nav className="ml-6 hidden gap-5 md:flex">

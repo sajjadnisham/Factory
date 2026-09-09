@@ -556,6 +556,26 @@ inside a 140-tall box.
 
 It appears in the header and the footer, and both are links to `/`.
 
+### Uploading your own artwork
+
+**Admin → Settings → Brand images.** Two slots — the wordmark (header and
+footer) and the roundel (homepage hero). PNG, JPG, WebP or SVG, up to 2MB.
+Upload replaces the drawn mark everywhere it appears, immediately; Remove puts
+the drawing back.
+
+The bytes live in Postgres, not `./public`, for the same reason product uploads
+do: a container on a free plan has no persistent filesystem, so anything written
+to disk is gone on the next deploy. That also means changing the logo needs no
+commit and no redeploy.
+
+`/api/brand/[key]` serves them, with the file's checksum as the ETag — so
+replacing the logo busts browser caches instead of leaving the old one up for a
+day. The slot name is checked against a fixed list rather than passed through,
+so the route can only ever return the two rows it is meant to.
+
+The drawn marks below are the fallback, not the default-forever: nothing is ever
+missing on a fresh install, and there is no broken-image state.
+
 ### The roundel
 
 `src/components/brand/factory-badge.tsx` is the stamped garment-label badge, in

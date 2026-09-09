@@ -24,6 +24,13 @@ import {
 } from "../src/lib/orders/service";
 import { syncStock } from "../src/lib/products/sync";
 import {
+  deleteBrandAsset,
+  getBrandAssets,
+  readBrandAsset,
+  saveBrandAsset,
+  validateBrandUpload,
+} from "../src/lib/brand";
+import {
   deleteUploadedProduct,
   listUploadedProducts,
   saveUploadedProduct,
@@ -711,6 +718,52 @@ async function main() {
       await db.product.deleteMany({ where: { sku: { startsWith: "E2E-UPLOAD-" } } });
       setStorageProvider(previousProvider);
       await syncStock({ triggeredBy: "e2e" });
+    }
+  }
+
+
+  // -------------------------------------------------------------------------
+  section("15. Brand artwork falls back to the drawn marks");
+  {
+    const png = await fs.readFile("stock/TSHIRT-001/01.png");
+    try {
+      await deleteBrandAsset("logo");
+      const empty = await getBrandAssets();
+      check("no upload means no asset, so the SVG renders", empty.logo === undefined);
+
+      check(
+        "a PDF is refused",
+        validateBrandUpload({ mimeType: "application/pdf", byteLength: 100 }) !== null,
+      );
+      check(
+        "an oversized file is refused",
+        validateBrandUpload({ mimeType: "image/png", byteLength: 9_000_000 }) !== null,
+      );
+      check(
+        "a normal PNG is accepted",
+        validateBrandUpload({ mimeType: "image/png", byteLength: png.byteLength }) === null,
+      );
+
+      await saveBrandAsset("logo", { mimeType: "image/png", bytes: png });
+      const stored = await getBrandAssets();
+      check("the upload is listed", stored.logo !== undefined);
+      check("its size is recorded", stored.logo?.size === png.byteLength);
+
+      const read = await readBrandAsset("logo");
+      check("bytes survive the round trip exactly", !!read && Buffer.compare(read.bytes, png) === 0);
+
+      // The checksum is the cache validator: replacing the artwork has to change
+      // it, or browsers keep serving the old logo.
+      const first = stored.logo?.checksum;
+      await saveBrandAsset("logo", { mimeType: "image/png", bytes: Buffer.concat([png, Buffer.from([0])]) });
+      const second = (await getBrandAssets()).logo?.checksum;
+      check("replacing the artwork changes the checksum", !!first && !!second && first !== second);
+
+      await deleteBrandAsset("logo");
+      check("removing it returns to the drawn mark", (await getBrandAssets()).logo === undefined);
+    } finally {
+      await deleteBrandAsset("logo");
+      await deleteBrandAsset("badge");
     }
   }
 
