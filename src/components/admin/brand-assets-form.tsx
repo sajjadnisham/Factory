@@ -44,7 +44,12 @@ export function BrandAssetsForm({ slots }: { slots: Slot[] }) {
         router.refresh();
       }
     } catch {
-      setError("Upload failed. Try a smaller file.");
+      // Reaching here means the request itself never completed — the action
+      // returns a reason for anything it can see. In practice that is the body
+      // size limit or a dropped connection.
+      setError(
+        "The upload did not reach the server. If the file is large, try a smaller one; otherwise check your connection and retry.",
+      );
     } finally {
       setBusy(null);
     }

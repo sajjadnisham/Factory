@@ -438,7 +438,22 @@ export async function uploadBrandAssetAction(
   const problem = validateBrandUpload({ mimeType: file.type, byteLength: bytes.byteLength });
   if (problem) return { ok: false, error: problem };
 
-  await saveBrandAsset(key, { mimeType: file.type, bytes });
+  try {
+    await saveBrandAsset(key, { mimeType: file.type, bytes });
+  } catch (error) {
+    // The likeliest cause on a freshly deployed instance is that the migration
+    // creating BrandAsset has not run yet, and "try a smaller file" would send
+    // the owner looking in entirely the wrong place.
+    const message = error instanceof Error ? error.message : String(error);
+    console.error(`[brand] saving ${key} failed:`, message);
+    return {
+      ok: false,
+      error: /BrandAsset|relation .* does not exist|P2021/i.test(message)
+        ? "The brand image table is missing. The database migration has not run on this deployment yet — redeploy, then try again."
+        : `Could not save the image: ${message}`,
+    };
+  }
+
   console.info(`[brand] ${key} replaced by ${auth.username}`);
   revalidateBrand();
   return { ok: true };
