@@ -64,7 +64,9 @@ export function SiteHeader({
             /* eslint-disable-next-line @next/next/no-img-element -- the file is
                of unknown dimensions and served from our own route, so next/image
                would buy nothing and needs a width and height we do not have. */
-            <img src={logoUrl} alt="" className="h-12 w-auto md:h-16" />
+            <span className="brand-round block h-12 w-12 md:h-16 md:w-16">
+              <img src={logoUrl} alt="" />
+            </span>
           ) : (
             <FactoryLogo title="" className="h-12 w-auto md:h-16" />
           )}

@@ -46,11 +46,28 @@ export default async function HomePage() {
         of them; type in the corner sits on near-black and needs no scrim.
       */}
       <section className="relative overflow-hidden text-[var(--color-on-slab)]">
-        <div className="relative aspect-[4/5] w-full sm:aspect-[16/10]">
-          {/* Wider than the screen and pushed up, so the ring is cropped by the
-              frame instead of floating inside it. */}
+        {/*
+          As close to a full screen as the call to action can survive.
+          
+          svh rather than vh, because on a phone vh is the tallest the viewport
+          ever gets — address bar retracted — so a 100vh hero is cut off on load
+          and only fits once you scroll. svh is the smallest state, which is the
+          one that has to fit.
+          
+          And 80, not 100: the promo bar and header sit *above* this section, so
+          a hero the full height of the viewport ends that much below the fold —
+          at 100svh the headline and SHOP NOW were both off screen. Measured on
+          a Pixel 5, that chrome is 142px of 727, leaving 80svh; the demo
+          banner is 47px of it, so a live store gets 87svh and a little of the
+          next section shows, which is the right cue that there is more below.
+          The button being in the first frame is the only reason this section
+          exists, so it sets the number.
+        */}
+        <div className="relative min-h-[80svh] w-full sm:min-h-[84svh]">
+          {/* Wider than the screen and centred on the mark, so the ring is
+              cropped by the frame instead of floating inside it. */}
           <div
-            className="eclipse left-1/2 top-[34%] h-[118vw] w-[118vw] -translate-x-1/2 -translate-y-1/2 sm:h-[58vw] sm:w-[58vw]"
+            className="eclipse left-1/2 top-[46%] h-[132svh] w-[132svh] -translate-x-1/2 -translate-y-1/2 sm:h-[88svh] sm:w-[88svh]"
             aria-hidden
           />
 
@@ -59,17 +76,18 @@ export default async function HomePage() {
               stamped roundel wants behind it — no scrim, no plate, and the ring
               reads as a halo around the mark rather than as decoration beside
               it. Sized and offset to match the ring's centre, not the frame's. */}
-          <div className="pointer-events-none absolute left-1/2 top-[34%] w-[38vw] max-w-[9.5rem] -translate-x-1/2 -translate-y-1/2 sm:w-[16vw]">
+          <div className="pointer-events-none absolute left-1/2 top-[46%] aspect-square w-[70vw] max-w-[26rem] -translate-x-1/2 -translate-y-1/2 sm:w-[36svh]">
             {brand.badge ? (
-              /* eslint-disable-next-line @next/next/no-img-element -- unknown
-                 intrinsic size, served from our own route. */
-              <img
-                src={`/api/brand/badge?v=${brand.badge.checksum.slice(0, 12)}`}
-                alt=""
-                className="h-auto w-full"
-              />
+              <span className="brand-round block h-full w-full">
+                {/* eslint-disable-next-line @next/next/no-img-element -- unknown
+                    intrinsic size, served from our own route. */}
+                <img
+                  src={`/api/brand/badge?v=${brand.badge.checksum.slice(0, 12)}`}
+                  alt=""
+                />
+              </span>
             ) : (
-              <FactoryBadge className="h-auto w-full" />
+              <FactoryBadge className="h-full w-full" />
             )}
           </div>
 
@@ -78,11 +96,14 @@ export default async function HomePage() {
               crossing four hues. Without one or the other, white type sits on
               cyan and amber at once and reads against neither. */}
           <div
-            className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[var(--color-paper)] via-[color-mix(in_srgb,var(--color-paper)_72%,transparent)] to-transparent"
+            className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-[var(--color-paper)] via-[color-mix(in_srgb,var(--color-paper)_74%,transparent)] to-transparent"
             aria-hidden
           />
 
-          <div className="relative flex h-full flex-col justify-between p-5">
+          {/* The bottom padding clears the fixed mobile nav. Without it the
+              call to action sits inside the viewport but underneath the bar,
+              which measures as visible and is not. */}
+          <div className="relative flex min-h-[80svh] flex-col justify-between p-5 pb-24 sm:min-h-[84svh] md:pb-5">
             <p className="max-w-[15rem] text-[0.7rem] leading-relaxed text-[var(--color-mist)]">
               {settings.tagline}
               <br />

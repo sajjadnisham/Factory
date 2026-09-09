@@ -556,6 +556,33 @@ inside a 140-tall box.
 
 It appears in the header and the footer, and both are links to `/`.
 
+### Round marks on square files
+
+Round artwork arrives on a square canvas, and the corners of that canvas are
+almost never transparent — the roundel is a dark disc on a cream field, which
+put a cream square around the mark everywhere it appeared.
+
+`.brand-round` clips to a circle **and** scales the image slightly past the
+frame, so the disc's own edge reaches the crop. The overscan is the part that
+matters: a plain `border-radius` still leaves a ring of canvas between the
+artwork and the clip. It is applied unconditionally because it is harmless on
+art that is already circular or transparent.
+
+### How tall the hero is, and why it is not 100svh
+
+The promo bar and header sit *above* the hero, so a hero the full height of the
+viewport ends that much below the fold. At `100svh` the headline and SHOP NOW
+were both off screen.
+
+Measured on a Pixel 5: that chrome is 142px of 727, leaving **80svh**. The demo
+banner is 47px of it, so a live store gets 87svh and a little of the next
+section shows — which is the right cue that there is more below.
+
+The hero also carries `pb-24` on mobile to clear the fixed bottom navigation.
+Without it the call to action sits *inside* the viewport and *underneath* the
+bar: it measures as visible and is not, which is exactly what the first version
+of the check reported.
+
 ### Uploading your own artwork
 
 **Admin → Settings → Brand images.** Two slots — the wordmark (header and

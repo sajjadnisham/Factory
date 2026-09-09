@@ -18,7 +18,9 @@ export function SiteFooter({ settings, categories, logoUrl }: Props) {
         <Link href="/" aria-label={`${settings.storeName} — home`} className="inline-block">
           {logoUrl ? (
             /* eslint-disable-next-line @next/next/no-img-element -- see header. */
-            <img src={logoUrl} alt="" className="h-20 w-auto" />
+            <span className="brand-round block h-20 w-20">
+              <img src={logoUrl} alt="" />
+            </span>
           ) : (
             <FactoryLogo title="" className="h-20 w-auto" />
           )}
